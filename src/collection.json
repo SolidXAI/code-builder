@@ -1,0 +1,24 @@
+{
+  "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "add-module": {
+      "description": "Adds a module",
+      "factory": "./code-builder/index#addModule",
+      "schema": "./code-builder/lib/module/add-module.schema.json"
+    },
+    "refresh-model": {
+      "description": "Adds / Updates model related files within an existing module",
+      "factory": "./code-builder/index#refreshModel",
+      "schema": "./code-builder/lib/model/refresh-model.schema.json"
+    },
+    "remove-fields": {
+      "description": "Removes fields on an existing model within an existing module",
+      "factory": "./code-builder/index#removeFields",
+      "schema": "./code-builder/lib/field/remove-fields.schema.json"
+    },
+    "showAST": {
+      "description": "shows the AST of the file",
+      "factory": "./code-builder/index#showAST"
+    }
+  }
+}

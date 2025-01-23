@@ -1,0 +1,38 @@
+{
+  "properties": {
+    "module": {
+      "type": "string",
+      "description": "The name of the existing module"
+    },
+    "model": {
+      "type": "string",
+      "description": "Metadata about the model"
+    },
+    "table": {
+      "type": "string",
+      "description": "The table name for the model"
+    },
+    "moduleDisplayName": {
+      "type": "string",
+      "description": "The display name for the module of the model"
+    },
+    "fields": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "JSON stringfied Metadata about a field"
+          },
+          "description": "An array of field metadata"
+        },
+        {
+          "type": "string",
+          "description": "JSON stringfied Metadata about a field"
+        }
+      ],
+      "description": "The field metadata for fields for the model"
+    }
+  },
+  "required": ["module", "model", "moduleDisplayName"]
+}
