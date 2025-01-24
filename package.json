@@ -1,13 +1,14 @@
 {
   "name": "@solidstarters/solid-code-builder",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "A blank schematics",
   "scripts": {
     "prebuild": "npm run clean",
     "build": "tsc && tsc-alias",
     "test": "npm run build && jasmine src/**/*_spec.js",
     "postbuild": "copyfiles './files/**/*' dist/",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "prepare": "npm run build"
   },
   "keywords": [
     "schematics"
