@@ -53,7 +53,7 @@ export function refreshModel(options: any): Rule {
 export function addModel(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
     //Link to a templates folder
-    const sourceTemplates: Source = apply(url('../../files/generate-model'), [
+    const sourceTemplates: Source = apply(url('../files/generate-model'), [
       template({ ...generateModelUtils, ...options }),
       move(`src/${options.module}`),
     ]);

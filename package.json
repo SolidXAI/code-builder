@@ -1,17 +1,20 @@
 {
   "name": "@solidstarters/solid-code-builder",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A blank schematics",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "test": "npm run build && jasmine src/**/*_spec.js"
+    "prebuild": "npm run clean",
+    "build": "tsc && tsc-alias",
+    "test": "npm run build && jasmine src/**/*_spec.js",
+    "postbuild": "copyfiles './files/**/*' dist/",
+    "clean": "rimraf dist"
   },
   "keywords": [
     "schematics"
   ],
   "author": "",
   "license": "MIT",
-  "schematics": "./src/collection.json",
+  "schematics": "./dist/collection.json",
   "dependencies": {
     "@angular-devkit/core": "^18.0.1",
     "@angular-devkit/schematics": "^18.0.1",
@@ -27,6 +30,9 @@
     "@types/lodash": "^4.17.0",
     "@types/node": "^18.18.0",
     "jasmine": "^5.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "copyfiles": "^2.4.1",
+    "rimraf": "^6.0.1",
+    "tsc-alias": "^1.8.10"
   }
 }

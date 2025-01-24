@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
     "lib": ["es2018", "dom"],
     "declaration": true,
     "module": "commonjs",
@@ -18,11 +19,9 @@
     "target": "es6",
     "types": ["jasmine", "node"],
     "esModuleInterop": true,
-    // "outDir": "./dist",// Added as part of solid config
     "outDir": "./dist",
-    "baseUrl": "./",
-
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.json","src/**/*"],
   "exclude": ["src/*/files/**/*"]
 }
