@@ -159,14 +159,26 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     );
 
     // Apply the unique index decorator changes at the class node level
-    const uniqueIndexDecoratorChanges =  this.uniqueIndexDecoratorManager.buildDecorator();
-    changes.push(...uniqueIndexDecoratorChanges.changes);
+    changes.push(...this.applyBuildDecoratorTransformationForUniqueIndex(modelName, source));
+
+    return {
+      filePath: source.fileName,
+      field: field,
+      changes: changes,
+    };
+  }
+
+  private applyBuildDecoratorTransformationForUniqueIndex(modelName: any, source: ts.SourceFile): Change[] {
+    const changes: Change[] = [];
+    if (!this.uniqueIndexDecoratorManager.isApplyDecorator()) return changes;
+    const uniqueIndexDecoratorChanges = this.uniqueIndexDecoratorManager.buildDecorator();
     const classDecoratorLines = `${uniqueIndexDecoratorChanges.fieldSourceLines.reverse().join('\n')}\n`;
     const classExportKeywordNode = getClassExportKeywordNode(classify(modelName), source);
     if (!classExportKeywordNode) {
       throw new Error(`Export keyword not found for class ${modelName} in file ${source.fileName}`);
     }
     const classExportKeywordStartPosition = classExportKeywordNode.getStart(source);
+    changes.push(...uniqueIndexDecoratorChanges.changes);
     changes.push(
       new InsertChange(
         source.fileName,
@@ -174,12 +186,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         classDecoratorLines
       )
     );
-
-    return {
-      filePath: source.fileName,
-      field: field,
-      changes: changes,
-    };
+    return changes;
   }
 
   private uniqueIndexDecoratorChanges(): [ts.ClassDeclaration, Change[]] {
@@ -253,7 +260,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
 
     // Update the property declaration node in the class hierarchy with the updated property declaration node
     // Then calculate the replace changes
-    // changes.push(...this.calculateReplaceChanges(this.printNode(updatedPropertyDeclarationNode, source), fieldPropertyDeclarationNode, source));
     this.uniqueIndexDecoratorManager.setFieldNode(updatedPropertyDeclarationNode);
     // Apply the unique index decorator changes at the class node level
     const [updatedClassNode, uniqueIndexDecoratorChanges] =  this.uniqueIndexDecoratorChanges();
