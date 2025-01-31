@@ -5,6 +5,8 @@ import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/
 import { insertImport } from '@schematics/angular/utility/ast-utils';
 import { Change, InsertChange } from '@schematics/angular/utility/change';
 import * as crypto from 'crypto';
+export const SOLID_CORE_MODULE_NAME = 'solid-core';
+export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidstarters/solid-core';
 
 import {
   FieldChange,
@@ -199,7 +201,7 @@ export function loadModuleMetadata(tree: Tree, moduleName: string) : ModuleMetad
 }
 
 function getModuleMetadataFilePath(moduleName: string) {
-  if (['solid-core'].includes(moduleName)) {
+  if (moduleName === SOLID_CORE_MODULE_NAME) {
     return `src/${moduleName}/seeders/seed-data/${moduleName}-metadata.json`
   }
   else {
@@ -393,7 +395,6 @@ export function handleUpdateChecksums(tree: any, moduleName: string, ...filePath
 // Refer -> https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API
 // https://learning-notes.mistermicheels.com/javascript/typescript/compiler-api/
 export function removeUnusedImports(tree: Tree, filePath: string): string {
-  // const sourceFile = createSourceFile(tree, filePath);
   const sourceCode = tree.readText(filePath);
   // const compilerOptions = {
   //   getScriptFileNames: () => [filePath],
@@ -478,4 +479,8 @@ export function takeBackupIfChecksumsMismatch(tree: Tree, moduleName: string) {
       createBackup(tree, filePath, fileContent);
     }
   });
+}
+
+export function calculateModuleFileImportPath(moduleName: string, internalPath: string) {
+ return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
 }

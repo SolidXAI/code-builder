@@ -48,7 +48,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       tree,
       `src/${dasherize(moduleName)}/entities/${dasherize(modelName)}.entity.ts`,
     );
-    // this.relationInverseSource = createSourceFile(tree, `src/${dasherize(this.field.relationModelSingularName)}/dtos/create-${dasherize(this.field.relationModelSingularName)}.dto.ts`)
 
     const fieldPropertyDeclarationNode = this.getFieldIdentifierNode(
       this.fieldName(),
