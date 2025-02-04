@@ -9,6 +9,9 @@ interface JoinTableDecoratorOptions {
     field: any;
     fieldName: string;
     modelName: string;
+    relationJoinTableName: string;
+    relationTableModelName: string;
+    relationTableModelNameInverse: string;
 }
 
 export class JoinTableDecoratorManager implements DecoratorManager {
@@ -97,9 +100,48 @@ export class JoinTableDecoratorManager implements DecoratorManager {
 
         // const mergedRelationOptions: ObjectLiteralElementLike[] = this.mergeNewAndExistingDecoratorOptions(existingRelationOptions);
 
+        const newRelationOptions: ts.ObjectLiteralElementLike[] = [
+            ts.factory.createPropertyAssignment(
+                'name',
+                ts.factory.createStringLiteral(
+                    this.options.relationJoinTableName
+                        ? `${this.options.relationJoinTableName}`
+                        : `${this.options.fieldName}`
+                )
+            ),
+            ts.factory.createPropertyAssignment(
+                'joinColumn',
+                ts.factory.createObjectLiteralExpression([
+                    ts.factory.createPropertyAssignment(
+                        'name',
+                        ts.factory.createStringLiteral(
+                            this.options.relationTableModelName ? `${this.options.relationTableModelName}_id` : `${this.options.fieldName}_id`)
+                    )
+                ])
+            ),
+            ts.factory.createPropertyAssignment(
+                'inverseJoinColumn',
+                ts.factory.createObjectLiteralExpression([
+                    ts.factory.createPropertyAssignment(
+                        'name',
+                        ts.factory.createStringLiteral(
+                            this.options.relationTableModelNameInverse ? `${this.options.relationTableModelNameInverse}_id` : `${this.options.fieldName}_id`)
+                    )
+                ])
+            ),
+        ];
+    
+        // Merge existing and new options, avoiding duplicates
+        const mergedRelationOptions = [
+            ...existingRelationOptions.filter(
+                (option) => !(ts.isPropertyAssignment(option) && option.name.getText() === 'name')
+            ),
+            ...newRelationOptions,
+        ];
+
         // Re-create the decorator with the merged decorator options
         const decoratorIdentifier = ts.factory.createIdentifier(this.decoratorName());
-        const argumentsArray: ts.Expression[] = this.createDecoratorArguments(existingRelationOptions);
+        const argumentsArray: ts.Expression[] = this.createDecoratorArguments(mergedRelationOptions);
         const call = ts.factory.createCallExpression(decoratorIdentifier, undefined, argumentsArray);
         return ts.factory.createDecorator(call)
     }

@@ -8,7 +8,6 @@ import {
   apply,
   branchAndMerge,
   chain,
-  externalSchematic,
   mergeWith,
   move,
   template,
@@ -18,19 +17,34 @@ import * as generateModelHelpers from './lib/model/helpers';
 import { addField } from './lib/model/helpers';
 import { removeField } from './lib/model/helpers';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
+import { strings } from '@angular-devkit/core';
 
 const generateModelUtils = { dasherize, classify, ...generateModelHelpers };
 // You don't have to export the function as default. You can also have more than one rule factory
 // per file.
 export function addModule(options: any): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
-    //Link to nestjs schematic
-    return chain([
-      externalSchematic('@nestjs/schematics', 'module', { //FIXME : Show better error. if addModule is called multiple times, it returns a very technical error i.e "A merge conflicted on path e.g 'src/client/client.module.ts'."
-        name: options?.module,
+    const moduleName = options.module;
+    const moduleFolderPath = `src/${moduleName}`;
+    const moduleFilePath = `${moduleFolderPath}/${strings.dasherize(moduleName)}.module.ts`;
+
+    if (_tree.exists(moduleFilePath)) {
+      throw new Error(`Module file already exists at ${moduleFilePath}. Please use a unique module name.`);
+    }
+    const sourceTemplates: Source = apply(url('../files/generate-module'), [
+      template({
+        ...generateModelUtils,
+        ...options,
+        name: moduleName
       }),
-      updateChecksum(options?.module, options?.generateChecksum, ...generateModelHelpers.getSourceFilePathsAffected(generateModelHelpers.Command.AddModule, options)),
+      move(moduleFolderPath),
     ]);
+    //Link to nestjs schematic
+    return branchAndMerge(
+      chain([
+        mergeWith(sourceTemplates, MergeStrategy.Overwrite),
+        updateChecksum(options?.module, options?.generateChecksum, ...generateModelHelpers.getSourceFilePathsAffected(generateModelHelpers.Command.AddModule, options)),
+    ]))(_tree, _context);
   };
 }
 

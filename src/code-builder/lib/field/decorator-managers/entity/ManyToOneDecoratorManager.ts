@@ -13,6 +13,7 @@ interface ManyToOneDecoratorOptions {
     field: any;
     fieldName: string;
     modelName: string;
+    relationModelFieldName: string;
 }
 export class ManyToOneDecoratorManager implements DecoratorManager {
     constructor(public options: ManyToOneDecoratorOptions, public fieldNode?: PropertyDeclaration,) { }
@@ -39,6 +40,7 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
         fieldSourceLines.push(
             `@${this.decoratorName()}(() => ${classify(this.options.relationModelSingularName)}, ${this.buildRelationOptionsCode()})`,
         );
+        fieldSourceLines.push(this.buildJoinColumnDecoratorCode());
         changes.push(...this.decoratorImports());
         return {
             filePath: this.options.source.fileName,
@@ -55,7 +57,9 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
             this.options.source,
             this.options.source.fileName,
             this.decoratorName(),
-            'typeorm')]
+            'typeorm'),
+            insertImport(this.options.source, this.options.source.fileName, 'JoinColumn', 'typeorm')
+        ]
     }
     updateDecorator(): [PropertyDeclaration, Change[]] {
         // Check if the field property declaration exists, if not throw an error
@@ -64,13 +68,14 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
         let existingModifiers = this.fieldNode.modifiers;
         // Check if field has an existing many-to-one relation decorator
         const existingDecorator = this.findDecorator(this.decoratorName(), existingModifiers);
+        const existingJoinColumnDecorator = this.findDecorator('JoinColumn', existingModifiers);
         //Remove the many-to-one decorator if it exists
         //TODO probably this too can be done in a lesser intrusive way i.e update everything instead of removing and adding
-        newModifiers = [...this.filterNonDecorators(existingModifiers), ...this.filterOtherDecorators(this.decoratorName(), existingModifiers)];
+        newModifiers = [...this.filterNonDecorators(existingModifiers), ...this.filterOtherDecorators(this.decoratorName(), existingModifiers), ...this.filterOtherDecorators('JoinColumn', existingModifiers)];
         //Add the many-to-one decorator if it is required  
         const changes: Change[] = [];  
         if (this.isApplyDecorator()) {
-            newModifiers = [...newModifiers, this.createRelationDecorator(existingDecorator)];
+            newModifiers = [...newModifiers, this.createRelationDecorator(existingDecorator), this.createJoinColumnDecorator(existingJoinColumnDecorator)];
             changes.push(...this.decoratorImports());
         }
         const updatedProperty = ts.factory.updatePropertyDeclaration(
@@ -82,6 +87,17 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
             this.fieldNode.initializer,
         );
         return [updatedProperty, changes];
+    }
+    private buildJoinColumnDecoratorCode(): string {
+        return `@JoinColumn(${this.buildJoinColumnOptionsCode()})`;
+    }
+    private buildJoinColumnOptionsCode(): string {
+        const options: Record<string, string> = {};
+        options['name'] = this.options.relationModelFieldName && this.options.relationModelFieldName !== 'id' ? `"${this.options.relationModelFieldName}_id"` : `"${this.options.fieldName}_id"`;
+
+        return `{ ${Object.entries(options)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ')} }`;
     }
     private buildRelationOptionsCode(): string {
         const options = this.buildRelationDecoratorOptions();
@@ -193,5 +209,42 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
         const callExpression = m.expression as ts.CallExpression;
         const identifier = callExpression.expression as ts.Identifier;
         return identifier.text === identifierName;
+    }
+    private createJoinColumnDecorator(existingJoinColumnDecorator: ts.Decorator | undefined): ts.Decorator {
+        let existingPropertyAssignments: ts.ObjectLiteralElementLike[] = [];
+        if (existingJoinColumnDecorator) {
+            const callExpression = existingJoinColumnDecorator.expression as ts.CallExpression;
+            if (callExpression.arguments.length > 0) {
+                if (!ts.isObjectLiteralExpression(callExpression.arguments[0])) {
+                    throw new Error('JoinColumn decorator arguments must be an object literal');
+                }
+                existingPropertyAssignments.push(...(callExpression.arguments[0] as ts.ObjectLiteralExpression).properties);
+            }
+        }
+        const newPropertyAssignments: ts.ObjectLiteralElementLike[] = [
+            ts.factory.createPropertyAssignment(
+                'name',
+                ts.factory.createStringLiteral(
+                    this.options.relationModelFieldName && this.options.relationModelFieldName !== 'id'
+                        ? `${this.options.relationModelFieldName}_id`
+                        : `${this.options.fieldName}_id`
+                )
+            )
+        ];
+        
+        const mergedAssignments = [
+            ...existingPropertyAssignments.filter(
+                (ps) => !(ts.isPropertyAssignment(ps) && ps.name.getText() === 'name')
+            ),
+            ...newPropertyAssignments,
+        ];
+
+        const call = ts.factory.createCallExpression(
+            ts.factory.createIdentifier('JoinColumn'),
+            undefined,
+            [ts.factory.createObjectLiteralExpression(mergedAssignments, true)]
+        );
+
+        return ts.factory.createDecorator(call);
     }
 }
