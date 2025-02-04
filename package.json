@@ -1,6 +1,6 @@
 {
   "name": "@solidstarters/solid-code-builder",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A blank schematics",
   "private": false,
   "publishConfig": {

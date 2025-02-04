@@ -14,7 +14,7 @@ import {
   url,
 } from '@angular-devkit/schematics';
 import * as generateModelHelpers from './lib/model/helpers';
-import { addField } from './lib/model/helpers';
+import { addField, SOLID_CORE_MODULE_NAME } from './lib/model/helpers';
 import { removeField } from './lib/model/helpers';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { strings } from '@angular-devkit/core';
@@ -50,8 +50,10 @@ export function addModule(options: any): Rule {
 
 export function refreshModel(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
+    const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
+
     // If the model related code is not present, then add it by call addModel, else call update field with the fields provided
-    const modelEntityFilePath = `src/${options.module}/entities/${dasherize(options.model)}.entity.ts`;
+    const modelEntityFilePath = `${modulePath}/entities/${dasherize(options.model)}.entity.ts`;
     // console.log('Model Entity File Path: ', modelEntityFilePath);
     if (!tree.exists(modelEntityFilePath)) {
       // console.log('Model does not exist, adding model');
@@ -66,10 +68,12 @@ export function refreshModel(options: any): Rule {
 
 export function addModel(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
+    // If the module is solid-core, the code needs to be generated in src/ since solid-core-module is a library & there is only 1 module
+    const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
     //Link to a templates folder
     const sourceTemplates: Source = apply(url('../files/generate-model'), [
       template({ ...generateModelUtils, ...options }),
-      move(`src/${options.module}`),
+      move(modulePath),
     ]);
     return branchAndMerge(
       chain([
@@ -132,7 +136,8 @@ export function removeFields(options: any): Rule {
 function addModuleImportsAndMetadata(options: any) { // TODO This method should perhaps be moved elsewhere since this is not a seperate command
   return (tree: Tree, _context: SchematicContext) => {
     // Handle the module imports
-    const moduleFilePath = `src/${dasherize(options.module)}/${dasherize(options.module)}.module.ts`;
+    const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
+    const moduleFilePath = `${modulePath}/${dasherize(options.module)}.module.ts`;
     const moduleImports: generateModelHelpers.ImportData[] = [
       { symbolName: `TypeOrmModule`, importPath: `@nestjs/typeorm` },
       generateModelHelpers.getSolidImports(
@@ -207,3 +212,4 @@ export function updateChecksum(moduleName: string, generateChecksum: boolean = f
     return generateModelHelpers.handleUpdateChecksums(tree, moduleName, ...filePaths);
   };
 }
+

@@ -1,8 +1,8 @@
 import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
 import { Tree } from '@angular-devkit/schematics';
 import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
-import { insertImport } from '@schematics/angular/utility/ast-utils';
 import { Change } from '@schematics/angular/utility/change';
+import { SOLID_CORE_MODULE_NAME } from '../../../model/helpers';
 import { OneToManyDecoratorManager } from '../../decorator-managers/entity/OneToManyDecoratorManager';
 import { DecoratorManager, FieldChange, FieldManager, FieldType, RelationType, createSourceFile, safeInsertImport } from '../../FieldManager';
 import {
@@ -29,7 +29,6 @@ export class ManyToOneRelationFieldManagerForEntity
         relatedEntityPath,
       );
 
-      // this.relationInverseSource = createSourceFile(tree, `src/${dasherize(this.field.relationModelSingularName)}/entities/${dasherize(this.field.relationModelSingularName)}.entity.ts`)
       this.oneToManyDecoratorManager = new OneToManyDecoratorManager(
         {
           isOneToMany: this.isOneToMany(),
@@ -113,7 +112,7 @@ export class ManyToOneRelationFieldManagerForEntity
   relatedFieldImport(): Change {
     const relatedEntityImportName = `${dasherize(this.field.relationModelSingularName)}.entity`;
     const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-    return insertImport(this.source, this.source.fileName, classify(this.field.relationModelSingularName), relatedEntityPath);
+    return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath);
   }
 
   private isOneToMany(): boolean {
@@ -166,7 +165,9 @@ export class ManyToOneRelationFieldManagerForEntity
 
   private inverseFieldImport(modelName: string, moduleName: string, source: ts.SourceFile): Change {
     const inverseEntityImportName = `${dasherize(modelName)}.entity`;
-    const inverseEntityPath = `src/${moduleName}/entities/${inverseEntityImportName}`;
+    const modulePath = (moduleName === SOLID_CORE_MODULE_NAME) ? `src` : `src/${moduleName}`;
+    
+    const inverseEntityPath = `${modulePath}/entities/${inverseEntityImportName}`;
     return safeInsertImport(source, classify(modelName), inverseEntityPath);
   }
 

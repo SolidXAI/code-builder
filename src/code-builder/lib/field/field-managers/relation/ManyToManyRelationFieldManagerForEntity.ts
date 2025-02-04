@@ -1,8 +1,8 @@
 import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
 import { Tree } from '@angular-devkit/schematics';
 import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
-import { insertImport } from '@schematics/angular/utility/ast-utils';
 import { Change } from '@schematics/angular/utility/change';
+import { SOLID_CORE_MODULE_NAME } from '../../../model/helpers';
 import { ManyToManyDecoratorManager } from '../../decorator-managers/entity/ManyToManyDecoratorManager';
 import { OneToManyDecoratorManager } from '../../decorator-managers/entity/OneToManyDecoratorManager';
 import { DecoratorManager, FieldChange, FieldManager, FieldType, createSourceFile, safeInsertImport } from '../../FieldManager';
@@ -90,7 +90,7 @@ export class ManyToManyRelationFieldManagerForEntity
     relatedFieldImport(): Change {
         const relatedEntityImportName = `${dasherize(this.field.relationModelSingularName)}.entity`;
         const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-        return insertImport(this.source, this.source.fileName, classify(this.field.relationModelSingularName), relatedEntityPath);
+        return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath);
     }
 
     override removeAdditionalField(): FieldChange {
@@ -139,7 +139,9 @@ export class ManyToManyRelationFieldManagerForEntity
 
     private inverseFieldImport(modelName: string, moduleName: string, source: ts.SourceFile): Change {
         const inverseEntityImportName = `${dasherize(modelName)}.entity`;
-        const inverseEntityPath = `src/${moduleName}/entities/${inverseEntityImportName}`;
+        const modulePath = (moduleName === SOLID_CORE_MODULE_NAME) ? `src` : `src/${moduleName}`;
+        
+        const inverseEntityPath = `${modulePath}/entities/${inverseEntityImportName}`;
     
         return safeInsertImport(source, `${classify(modelName)}`, inverseEntityPath);
     }

@@ -2,14 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DiscoveryService } from "@nestjs/core";
 import { EntityManager, Repository } from 'typeorm';
-import { CRUDService } from '@solidstarters/solid-core-module';
-import { ModelMetadataService } from '@solidstarters/solid-core-module';
-import { ModuleMetadataService } from '@solidstarters/solid-core-module';
-import { MediaStorageProviderMetadataService } from '@solidstarters/solid-core-module';
+
+import { CRUDService } from '<%= calculateModuleFileImportPath(module,"src/services/crud.service") %>';
+import { ModelMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/model-metadata.service") %>';
+import { ModuleMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/module-metadata.service") %>';
+import { MediaStorageProviderMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/media-storage-provider-metadata.service") %>';
 import { ConfigService } from '@nestjs/config';
-import { MediaService } from '@solidstarters/solid-core-module';
-import { FileService } from '@solidstarters/solid-core-module';
-import { CrudHelperService } from '@solidstarters/solid-core-module';
+import { MediaService } from '<%= calculateModuleFileImportPath(module,"src/services/media.service") %>';
+import { FileService } from '<%= calculateModuleFileImportPath(module,"src/services/file.service") %>';
+import { CrudHelperService } from '<%= calculateModuleFileImportPath(module,"src/services/crud-helper.service") %>';
 
 
 import { <%= classify(model) %> } from '../entities/<%= dasherize(model) %>.entity';

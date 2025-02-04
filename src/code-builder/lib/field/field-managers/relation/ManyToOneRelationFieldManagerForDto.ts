@@ -8,6 +8,7 @@ import { TransformDecoratorManager } from '../../decorator-managers/dto/Transfor
 import { DecoratorManager, DecoratorType, DtoSourceType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, createSourceFile, safeInsertImport } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
 import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecoratorManager';
+import { SOLID_CORE_MODULE_NAME } from '../../../model/helpers';
 
 export class ManyToOneRelationFieldManagerForDto
   extends BaseFieldManagerForDto
@@ -307,7 +308,9 @@ export class ManyToOneRelationFieldManagerForDto
 
   private inverseFieldImport(modelName: string, moduleName: string,  source: ts.SourceFile): Change {
     const inverseEntityImportName = `update-${dasherize(modelName)}.dto`;
-    const inverseEntityPath = `src/${moduleName}/dtos/${inverseEntityImportName}`;
+    const modulePath = (moduleName === SOLID_CORE_MODULE_NAME) ? `src` : `src/${moduleName}`;
+    
+    const inverseEntityPath = `${modulePath}/dtos/${inverseEntityImportName}`;
 
     return safeInsertImport(source, `Update${classify(modelName)}Dto`, inverseEntityPath);
   }

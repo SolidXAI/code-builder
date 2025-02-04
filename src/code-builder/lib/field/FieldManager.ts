@@ -19,6 +19,7 @@ import { ManyToOneRelationFieldHandler } from './field-managers/relation/ManyToO
 import { RichTextFieldHandler } from './field-managers/rich-text/RichTextFieldHandler';
 import { ShortTextFieldHandler } from './field-managers/short-text/ShortTextFieldHandler';
 import { UUIDFieldHandler } from './field-managers/uuid/UUIDFieldHandler';
+import { SOLID_CORE_MODULE_NAME } from '../model/helpers';
 
 export const MAX_EMAIL_LENGTH = 254;
 export const UUID_REGEX = `^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
@@ -231,6 +232,10 @@ export function getFieldHandler(
 }
 
 export function createSourceFile(tree: Tree, filePath: string) {
+  //if filePath starts with src/solid-core, replace it with src/
+  if (filePath.startsWith(`src/${SOLID_CORE_MODULE_NAME }`)) {
+    filePath = filePath.replace(`src/${SOLID_CORE_MODULE_NAME }`, 'src');
+  }
   return ts.createSourceFile(
     filePath,
     tree.readText(filePath),
@@ -279,6 +284,10 @@ export class ManagerForDtoOptions {
 // insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath);
 export function safeInsertImport(source: ts.SourceFile, symbolName: string, importFileName: string ): Change {
   // Check if in current source, there exists a class with the same symbolName
+  if (importFileName.startsWith(`src/${SOLID_CORE_MODULE_NAME }`)) {
+    importFileName = importFileName.replace(`src/${SOLID_CORE_MODULE_NAME }`, 'src');
+  }
+
   if (!getClassNode(symbolName, source)){
     return insertImport(source, source.fileName, symbolName, importFileName);
   }
