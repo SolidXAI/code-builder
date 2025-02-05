@@ -38,7 +38,7 @@ export class JoinTableDecoratorManager implements DecoratorManager {
         //     changes.push(decoratorImport);
         // }
         fieldSourceLines.push(
-            `@${this.decoratorName()}()`,
+            `@${this.decoratorName()}(${this.buildRelationOptionsCode()})`,
         );
         changes.push(...this.decoratorImports());
 
@@ -93,6 +93,37 @@ export class JoinTableDecoratorManager implements DecoratorManager {
             this.fieldNode.initializer,
         );
         return [updatedProperty, changes];
+    }
+
+    private buildRelationOptionsCode(): string {
+        const options: Record<string, string | Record<string, string>> = {};
+    
+        // Add 'name' attribute
+        options['name'] = this.options.relationJoinTableName
+            ? `"${this.options.relationJoinTableName}"`
+            : `"${this.options.fieldName}"`;
+    
+        // Add 'joinColumn' attribute
+        options['joinColumn'] = {
+            name: `"${this.options.relationTableModelName ? `${this.options.relationTableModelName}_id` : `${this.options.fieldName}_id`}"`,
+        };
+    
+        // Add 'inverseJoinColumn' attribute
+        options['inverseJoinColumn'] = {
+            name: `"${this.options.relationTableModelNameInverse ? `${this.options.relationTableModelNameInverse}_id` : `${this.options.fieldName}_id`}"`,
+        };
+    
+        return `{ ${Object.entries(options)
+            .map(([key, value]) => {
+                if (typeof value === 'string') {
+                    return `${key}: ${value}`;
+                }
+                const nestedOptions = Object.entries(value)
+                    .map(([nestedKey, nestedValue]) => `${nestedKey}: ${nestedValue}`)
+                    .join(', ');
+                return `${key}: { ${nestedOptions} }`;
+            })
+            .join(', ')} }`;
     }
 
     private createDecorator(existingDecorator: ts.Decorator | undefined): ts.Decorator {
