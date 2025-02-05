@@ -9,6 +9,9 @@ interface JoinTableDecoratorOptions {
     field: any;
     fieldName: string;
     modelName: string;
+    relationJoinTableName: string;
+    relationTableModelName: string;
+    relationTableModelNameInverse: string;
 }
 
 export class JoinTableDecoratorManager implements DecoratorManager {
@@ -35,7 +38,7 @@ export class JoinTableDecoratorManager implements DecoratorManager {
         //     changes.push(decoratorImport);
         // }
         fieldSourceLines.push(
-            `@${this.decoratorName()}()`,
+            `@${this.decoratorName()}(${this.buildRelationOptionsCode()})`,
         );
         changes.push(...this.decoratorImports());
 
@@ -92,14 +95,84 @@ export class JoinTableDecoratorManager implements DecoratorManager {
         return [updatedProperty, changes];
     }
 
+    private buildRelationOptionsCode(): string {
+        const options: Record<string, string | Record<string, string>> = {};
+    
+        // Add 'name' attribute
+        options['name'] = this.options.relationJoinTableName
+            ? `"${this.options.relationJoinTableName}"`
+            : `"${this.options.fieldName}"`;
+    
+        // Add 'joinColumn' attribute
+        options['joinColumn'] = {
+            name: `"${this.options.relationTableModelName ? `${this.options.relationTableModelName}_id` : `${this.options.fieldName}_id`}"`,
+        };
+    
+        // Add 'inverseJoinColumn' attribute
+        options['inverseJoinColumn'] = {
+            name: `"${this.options.relationTableModelNameInverse ? `${this.options.relationTableModelNameInverse}_id` : `${this.options.fieldName}_id`}"`,
+        };
+    
+        return `{ ${Object.entries(options)
+            .map(([key, value]) => {
+                if (typeof value === 'string') {
+                    return `${key}: ${value}`;
+                }
+                const nestedOptions = Object.entries(value)
+                    .map(([nestedKey, nestedValue]) => `${nestedKey}: ${nestedValue}`)
+                    .join(', ');
+                return `${key}: { ${nestedOptions} }`;
+            })
+            .join(', ')} }`;
+    }
+
     private createDecorator(existingDecorator: ts.Decorator | undefined): ts.Decorator {
         let existingRelationOptions: ts.ObjectLiteralElementLike[] = this.existingDecoratorOptions(existingDecorator);
 
         // const mergedRelationOptions: ObjectLiteralElementLike[] = this.mergeNewAndExistingDecoratorOptions(existingRelationOptions);
 
+        const newRelationOptions: ts.ObjectLiteralElementLike[] = [
+            ts.factory.createPropertyAssignment(
+                'name',
+                ts.factory.createStringLiteral(
+                    this.options.relationJoinTableName
+                        ? `${this.options.relationJoinTableName}`
+                        : `${this.options.fieldName}`
+                )
+            ),
+            ts.factory.createPropertyAssignment(
+                'joinColumn',
+                ts.factory.createObjectLiteralExpression([
+                    ts.factory.createPropertyAssignment(
+                        'name',
+                        ts.factory.createStringLiteral(
+                            this.options.relationTableModelName ? `${this.options.relationTableModelName}_id` : `${this.options.fieldName}_id`)
+                    )
+                ])
+            ),
+            ts.factory.createPropertyAssignment(
+                'inverseJoinColumn',
+                ts.factory.createObjectLiteralExpression([
+                    ts.factory.createPropertyAssignment(
+                        'name',
+                        ts.factory.createStringLiteral(
+                            this.options.relationTableModelNameInverse ? `${this.options.relationTableModelNameInverse}_id` : `${this.options.fieldName}_id`)
+                    )
+                ])
+            ),
+        ];
+    
+        // Merge existing and new options, avoiding duplicates
+        const mergedRelationOptions = [
+            ...existingRelationOptions.filter(
+                (option) => !(ts.isPropertyAssignment(option) && option.name.getText() === 'name')
+            ),
+            ...newRelationOptions,
+        ];
+
         // Re-create the decorator with the merged decorator options
         const decoratorIdentifier = ts.factory.createIdentifier(this.decoratorName());
-        const argumentsArray: ts.Expression[] = this.createDecoratorArguments(existingRelationOptions);
+        const argumentsArray: ts.Expression[] = this.createDecoratorArguments(mergedRelationOptions);
         const call = ts.factory.createCallExpression(decoratorIdentifier, undefined, argumentsArray);
         return ts.factory.createDecorator(call)
     }

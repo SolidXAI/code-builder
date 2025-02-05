@@ -104,6 +104,9 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         field: this.field,
         fieldName: this.fieldName(),
         modelName: this.modelName,
+        relationJoinTableName: this.field.relationJoinTableName,
+        relationTableModelName: this.field.relationTableModelName,
+        relationTableModelNameInverse: this. field.relationTableModelNameInverse
       },
     );
     this.uniqueIndexDecoratorManager = new UniqueIndexDecoratorManager(
