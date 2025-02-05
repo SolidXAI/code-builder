@@ -81,7 +81,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         field: this.field,
         fieldName: this.fieldName(),
         modelName: this.modelName,
-        relationModelFieldName: this.field.relationModelFieldName
       },
       fieldPropertyDeclarationNode,
     );
