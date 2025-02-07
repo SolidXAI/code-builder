@@ -55,7 +55,7 @@ export class UniqueIndexDecoratorManager {
         const existingUniqueIndexDecorator = this.findUniqueIndexDecorator(existingModifiers);
 
         //Remove the Index decorator if the Index decorator exists
-        newModifiers = [...this.filterOtherDecorators(this.decoratorName(), existingModifiers), ...this.filterOtherIndexDecorators(this.decoratorName(), this.options, existingModifiers), ...this.filterNonDecorators(existingModifiers)];
+        newModifiers = [...this.filterNonDecorators(existingModifiers),...this.filterOtherDecorators(this.decoratorName(), existingModifiers), ...this.filterOtherIndexDecorators(this.decoratorName(), this.options, existingModifiers)];
 
         //Add the column decorator if column decorator is required  
         const changes: Change[] = [];
