@@ -1,7 +1,7 @@
 {
   "name": "@solidstarters/solid-code-builder",
-  "version": "1.0.5",
-  "description": "A blank schematics",
+  "version": "1.0.6",
+  "description": "This package is use to generate code for the @solidstarters projects",
   "private": false,
   "publishConfig": {
     "access": "public"
