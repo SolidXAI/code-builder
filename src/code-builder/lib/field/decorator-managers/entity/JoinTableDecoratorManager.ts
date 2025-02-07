@@ -99,20 +99,18 @@ export class JoinTableDecoratorManager implements DecoratorManager {
         const options: Record<string, string | Record<string, string>> = {};
     
         if (this.options.relationJoinTableName) {
-            options['name'] = this.options.relationJoinTableName
-                ? `"${this.options.relationJoinTableName}"`
-                : `"${this.options.fieldName}"`;
+            options['name'] = `${this.options.relationJoinTableName}`;
         }
     
         if (this.options.relationTableModelName) {
             options['joinColumn'] = {
-                name: `"${this.options.relationTableModelName ? `${this.options.relationTableModelName}_id` : `${this.options.fieldName}_id`}"`,
+                name: `${this.options.relationTableModelName}_id`,
             };
         }
     
         if (this.options.relationTableModelNameInverse) {
             options['inverseJoinColumn'] = {
-                name: `"${this.options.relationTableModelNameInverse ? `${this.options.relationTableModelNameInverse}_id` : `${this.options.fieldName}_id`}"`,
+                name: `${this.options.relationTableModelNameInverse}_id`,
             };
         }
     
