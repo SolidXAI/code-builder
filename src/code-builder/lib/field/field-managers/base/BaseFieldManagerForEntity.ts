@@ -27,12 +27,14 @@ import { ManyToManyDecoratorManager } from '../../decorator-managers/entity/Many
 import { JoinTableDecoratorManager } from '../../decorator-managers/entity/JoinTableDecoratorManager';
 import { RelationType } from "../../FieldManager";
 import { UniqueIndexDecoratorManager } from '../../decorator-managers/entity/UniqueIndexDecoratorManager';
+import { JoinColumnDecoratorManager } from '../../decorator-managers/entity/JoinColumnDecoratorManager';
 
 export abstract class BaseFieldManagerForEntity implements FieldManager {
   source: SourceFile;
   indexDecoratorManager: IndexDecoratorManager;
   columnDecoratorManager: ColumnDecoratorManager;
   manyToOneDecoratorManager: ManyToOneDecoratorManager;
+  joinColumnDecoratorManager: DecoratorManager;
   manyToManyDecoratorManager: DecoratorManager;
   joinTableDecoratorManager: DecoratorManager;
   uniqueIndexDecoratorManager: UniqueIndexDecoratorManager;
@@ -83,6 +85,15 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         modelName: this.modelName,
       },
       fieldPropertyDeclarationNode,
+    );
+    this.joinColumnDecoratorManager = new JoinColumnDecoratorManager(
+      {
+        isManyToOneRelationOwner: this.field.relationType === RelationType.ManyToOne,
+        source: this.source,
+        field: this.field,
+        fieldName: this.fieldName(),
+        relationModelFieldName: this.field.relationModelFieldName
+      },
     );
     this.manyToManyDecoratorManager = new ManyToManyDecoratorManager(
       {
@@ -485,7 +496,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   }
 
   private decoratorManagers(): DecoratorManager[] {
-    return [this.indexDecoratorManager, this.columnDecoratorManager, this.manyToOneDecoratorManager, this.manyToManyDecoratorManager, this.joinTableDecoratorManager];
+    return [this.indexDecoratorManager, this.columnDecoratorManager, this.manyToOneDecoratorManager, this.joinColumnDecoratorManager, this.manyToManyDecoratorManager, this.joinTableDecoratorManager];
   }
 
   protected addAdditionalField(): FieldChange[] {
