@@ -98,20 +98,23 @@ export class JoinTableDecoratorManager implements DecoratorManager {
     private buildRelationOptionsCode(): string {
         const options: Record<string, string | Record<string, string>> = {};
     
-        // Add 'name' attribute
-        options['name'] = this.options.relationJoinTableName
-            ? `"${this.options.relationJoinTableName}"`
-            : `"${this.options.fieldName}"`;
+        if (this.options.relationJoinTableName) {
+            options['name'] = this.options.relationJoinTableName
+                ? `"${this.options.relationJoinTableName}"`
+                : `"${this.options.fieldName}"`;
+        }
     
-        // Add 'joinColumn' attribute
-        options['joinColumn'] = {
-            name: `"${this.options.relationTableModelName ? `${this.options.relationTableModelName}_id` : `${this.options.fieldName}_id`}"`,
-        };
+        if (this.options.relationTableModelName) {
+            options['joinColumn'] = {
+                name: `"${this.options.relationTableModelName ? `${this.options.relationTableModelName}_id` : `${this.options.fieldName}_id`}"`,
+            };
+        }
     
-        // Add 'inverseJoinColumn' attribute
-        options['inverseJoinColumn'] = {
-            name: `"${this.options.relationTableModelNameInverse ? `${this.options.relationTableModelNameInverse}_id` : `${this.options.fieldName}_id`}"`,
-        };
+        if (this.options.relationTableModelNameInverse) {
+            options['inverseJoinColumn'] = {
+                name: `"${this.options.relationTableModelNameInverse ? `${this.options.relationTableModelNameInverse}_id` : `${this.options.fieldName}_id`}"`,
+            };
+        }
     
         return `{ ${Object.entries(options)
             .map(([key, value]) => {
@@ -129,38 +132,43 @@ export class JoinTableDecoratorManager implements DecoratorManager {
     private createDecorator(existingDecorator: ts.Decorator | undefined): ts.Decorator {
         let existingRelationOptions: ts.ObjectLiteralElementLike[] = this.existingDecoratorOptions(existingDecorator);
 
-        // const mergedRelationOptions: ObjectLiteralElementLike[] = this.mergeNewAndExistingDecoratorOptions(existingRelationOptions);
-
-        const newRelationOptions: ts.ObjectLiteralElementLike[] = [
-            ts.factory.createPropertyAssignment(
-                'name',
-                ts.factory.createStringLiteral(
-                    this.options.relationJoinTableName
-                        ? `${this.options.relationJoinTableName}`
-                        : `${this.options.fieldName}`
+        const newRelationOptions: ts.ObjectLiteralElementLike[] = [];
+        if (this.options.relationJoinTableName) {
+            newRelationOptions.push(
+                ts.factory.createPropertyAssignment(
+                    'name',
+                    ts.factory.createStringLiteral(this.options.relationJoinTableName)
                 )
-            ),
-            ts.factory.createPropertyAssignment(
-                'joinColumn',
-                ts.factory.createObjectLiteralExpression([
-                    ts.factory.createPropertyAssignment(
-                        'name',
-                        ts.factory.createStringLiteral(
-                            this.options.relationTableModelName ? `${this.options.relationTableModelName}_id` : `${this.options.fieldName}_id`)
-                    )
-                ])
-            ),
-            ts.factory.createPropertyAssignment(
-                'inverseJoinColumn',
-                ts.factory.createObjectLiteralExpression([
-                    ts.factory.createPropertyAssignment(
-                        'name',
-                        ts.factory.createStringLiteral(
-                            this.options.relationTableModelNameInverse ? `${this.options.relationTableModelNameInverse}_id` : `${this.options.fieldName}_id`)
-                    )
-                ])
-            ),
-        ];
+            );
+        }
+    
+        if (this.options.relationTableModelName) {
+            newRelationOptions.push(
+                ts.factory.createPropertyAssignment(
+                    'joinColumn',
+                    ts.factory.createObjectLiteralExpression([
+                        ts.factory.createPropertyAssignment(
+                            'name',
+                            ts.factory.createStringLiteral(`${this.options.relationTableModelName}_id`)
+                        ),
+                    ])
+                )
+            );
+        }
+    
+        if (this.options.relationTableModelNameInverse) {
+            newRelationOptions.push(
+                ts.factory.createPropertyAssignment(
+                    'inverseJoinColumn',
+                    ts.factory.createObjectLiteralExpression([
+                        ts.factory.createPropertyAssignment(
+                            'name',
+                            ts.factory.createStringLiteral(`${this.options.relationTableModelNameInverse}_id`)
+                        ),
+                    ])
+                )
+            );
+        }
     
         // Merge existing and new options, avoiding duplicates
         const mergedRelationOptions = [
