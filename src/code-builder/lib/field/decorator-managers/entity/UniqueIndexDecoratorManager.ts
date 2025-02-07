@@ -48,22 +48,26 @@ export class UniqueIndexDecoratorManager {
     updateDecorator(): [ClassDeclaration, Change[]] {
         if (!this.classNode) throw new Error('Class node is required for updating the unique index decorator');
 
-        let newModifiers: ModifierLike[] | undefined = [];
-        let existingModifiers: ts.NodeArray<ModifierLike> | undefined = this.classNode.modifiers;
+        let existingModifierLikes: ts.NodeArray<ModifierLike> | undefined = this.classNode.modifiers;
 
         // Get the existing unique index decorator if it exists
-        const existingUniqueIndexDecorator = this.findUniqueIndexDecorator(existingModifiers);
+        const existingUniqueIndexDecorator = this.findUniqueIndexDecorator(existingModifierLikes);
 
         //Remove the Index decorator if the Index decorator exists
-        newModifiers = [...this.filterOtherDecorators(this.decoratorName(), existingModifiers), ...this.filterOtherIndexDecorators(this.decoratorName(), this.options, existingModifiers), ...this.filterNonDecorators(existingModifiers)];
+        const existingModifiers = this.filterNonDecorators(existingModifierLikes);
+        const newDecorators = [...this.filterOtherDecorators(this.decoratorName(), existingModifierLikes), ...this.filterOtherIndexDecorators(this.decoratorName(), this.options, existingModifierLikes)];
 
         //Add the column decorator if column decorator is required  
         const changes: Change[] = [];
 
         if (this.isApplyDecorator()) {
-            newModifiers = [...newModifiers, this.createUniqueIndexDecorator(existingUniqueIndexDecorator)];
+            // newModifiers = [...newModifiers, this.createUniqueIndexDecorator(existingUniqueIndexDecorator)];
+            newDecorators.push(this.createUniqueIndexDecorator(existingUniqueIndexDecorator));
             changes.push(...this.decoratorImports());
         }
+
+        //Since the order matters i.e decorators should appear above the export keyword
+        const newModifierLikes = [...newDecorators, ...existingModifiers];
 
         // If field node is provided, replace the class members with the updated field node
         const newMembers = this.classNode.members.filter((member) => {
@@ -82,7 +86,7 @@ export class UniqueIndexDecoratorManager {
         // Update the class node with the new modifiers
         const updatedClass = ts.factory.updateClassDeclaration(
             this.classNode,
-            newModifiers,
+            newModifierLikes,
             this.classNode.name,
             this.classNode.typeParameters,
             this.classNode.heritageClauses,

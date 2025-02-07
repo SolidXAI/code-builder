@@ -2,7 +2,6 @@ import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
 import { Tree } from '@angular-devkit/schematics';
 import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { Change } from '@schematics/angular/utility/change';
-import { SOLID_CORE_MODULE_NAME } from '../../../model/helpers';
 import { ManyToManyDecoratorManager } from '../../decorator-managers/entity/ManyToManyDecoratorManager';
 import { OneToManyDecoratorManager } from '../../decorator-managers/entity/OneToManyDecoratorManager';
 import { DecoratorManager, FieldChange, FieldManager, FieldType, createSourceFile, safeInsertImport } from '../../FieldManager';
@@ -90,7 +89,7 @@ export class ManyToManyRelationFieldManagerForEntity
     relatedFieldImport(): Change {
         const relatedEntityImportName = `${dasherize(this.field.relationModelSingularName)}.entity`;
         const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-        return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath);
+        return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath, this.moduleName);
     }
 
     override removeAdditionalField(): FieldChange {
@@ -137,13 +136,13 @@ export class ManyToManyRelationFieldManagerForEntity
         return fieldChange;    
     }
 
-    private inverseFieldImport(modelName: string, moduleName: string, source: ts.SourceFile): Change {
+    private inverseFieldImport(modelName: string, currentModuleName: string, source: ts.SourceFile): Change {
         const inverseEntityImportName = `${dasherize(modelName)}.entity`;
-        const modulePath = (moduleName === SOLID_CORE_MODULE_NAME) ? `src` : `src/${moduleName}`;
+        const modulePath = `src/${currentModuleName}`;
         
         const inverseEntityPath = `${modulePath}/entities/${inverseEntityImportName}`;
     
-        return safeInsertImport(source, `${classify(modelName)}`, inverseEntityPath);
+        return safeInsertImport(source, `${classify(modelName)}`, inverseEntityPath, currentModuleName);
     }
 
     override addOrUpdateAdditionalField(): FieldChange[] {
