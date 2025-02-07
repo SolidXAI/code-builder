@@ -4,11 +4,10 @@ import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.
 import { Change } from '@schematics/angular/utility/change';
 import { ArrayDecoratorManager } from '../../decorator-managers/dto/ArrayDecoratorManager';
 import { OptionalDecoratorManager } from '../../decorator-managers/dto/OptionalDecoratorManager';
+import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecoratorManager';
 import { TransformDecoratorManager } from '../../decorator-managers/dto/TransformDecoratorManager';
 import { DecoratorManager, DecoratorType, DtoSourceType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, createSourceFile, safeInsertImport } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
-import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecoratorManager';
-import { SOLID_CORE_MODULE_NAME } from '../../../model/helpers';
 
 export class ManyToManyRelationFieldManagerForDto
     extends BaseFieldManagerForDto
@@ -192,11 +191,11 @@ export class ManyToManyRelationFieldManagerForDto
 
     }
 
-    private inverseFieldImport(modelName: string, moduleName: string, source: ts.SourceFile): Change {
+    private inverseFieldImport(modelName: string, currentModuleName: string, source: ts.SourceFile): Change {
         const inverseEntityImportName = `update-${dasherize(modelName)}.dto`;
-        const modulePath = (moduleName === SOLID_CORE_MODULE_NAME) ? `src` : `src/${moduleName}`;
+        const modulePath = `src/${currentModuleName}`;
         const inverseEntityPath = `${modulePath}/dtos/${inverseEntityImportName}`;
-        return safeInsertImport(source, `Update${classify(modelName)}Dto`, inverseEntityPath);
+        return safeInsertImport(source, `Update${classify(modelName)}Dto`, inverseEntityPath, currentModuleName);
     }
     
     private addAdditionalInverseField() : FieldChange {
@@ -441,7 +440,7 @@ export class ManyToManyRelationFieldManagerForDto
     relatedFieldImport(): Change {
         const relatedEntityImportName = `update-${dasherize(this.field.relationModelSingularName)}.dto`;
         const relatedEntityPath = this.field.relationModelModuleName ? `src/${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-        return safeInsertImport(this.source, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath);
+        return safeInsertImport(this.source, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
         // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath);
     } //Uncomment this method while implementing many-to-many relation changes
 }

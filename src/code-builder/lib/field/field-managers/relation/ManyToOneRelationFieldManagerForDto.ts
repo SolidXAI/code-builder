@@ -4,11 +4,10 @@ import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.
 import { Change } from '@schematics/angular/utility/change';
 import { ArrayDecoratorManager } from '../../decorator-managers/dto/ArrayDecoratorManager';
 import { OptionalDecoratorManager } from '../../decorator-managers/dto/OptionalDecoratorManager';
+import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecoratorManager';
 import { TransformDecoratorManager } from '../../decorator-managers/dto/TransformDecoratorManager';
 import { DecoratorManager, DecoratorType, DtoSourceType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, createSourceFile, safeInsertImport } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
-import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecoratorManager';
-import { SOLID_CORE_MODULE_NAME } from '../../../model/helpers';
 
 export class ManyToOneRelationFieldManagerForDto
   extends BaseFieldManagerForDto
@@ -306,13 +305,13 @@ export class ManyToOneRelationFieldManagerForDto
     }
   }
 
-  private inverseFieldImport(modelName: string, moduleName: string,  source: ts.SourceFile): Change {
+  private inverseFieldImport(modelName: string, currentModuleName: string,  source: ts.SourceFile): Change {
     const inverseEntityImportName = `update-${dasherize(modelName)}.dto`;
-    const modulePath = (moduleName === SOLID_CORE_MODULE_NAME) ? `src` : `src/${moduleName}`;
+    const modulePath = `src/${currentModuleName}`;
     
     const inverseEntityPath = `${modulePath}/dtos/${inverseEntityImportName}`;
 
-    return safeInsertImport(source, `Update${classify(modelName)}Dto`, inverseEntityPath);
+    return safeInsertImport(source, `Update${classify(modelName)}Dto`, inverseEntityPath, currentModuleName);
   }
 
   override removeAdditionalField(): FieldChange[] {
