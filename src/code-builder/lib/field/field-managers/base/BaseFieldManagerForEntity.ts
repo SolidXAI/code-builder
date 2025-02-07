@@ -260,16 +260,21 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     updatedPropertyDeclarationNode = updatedPropertyDeclarationNodeTransformed;
     changes.push(...decoratorChanges);
 
-    // Update the property declaration node in the class hierarchy with the updated property declaration node
-    // Then calculate the replace changes
-    this.uniqueIndexDecoratorManager.setFieldNode(updatedPropertyDeclarationNode);
-    // Apply the unique index decorator changes at the class node level
-    const [updatedClassNode, uniqueIndexDecoratorChanges] =  this.uniqueIndexDecoratorChanges();
-    changes.push(...uniqueIndexDecoratorChanges);
-    changes.push(...this.calculateReplaceChanges(this.printNode(updatedClassNode, source), this.getClassNode(this.modelName, source), source)); //FIXME: this.modelName to passed in for avoiding statefullness
-   
-    // this.uniqueIndexDecoratorChanges(changes, source, this.getClassNode(this.modelName, source));
-
+    // Currently additional field support is only limited to relation fields for entities, so there is no need to update the class nodes
+    // Since unique index decorator supported is only for fields which are not relation fields.
+    // Also the current additional field algorithm is not able to deal with the class where the primary field operations modifies the class node
+    if (!this.isAdditionalFieldRequired()) { 
+      // Update the property declaration node in the class hierarchy with the updated property declaration node
+      // Then calculate the replace changes
+      this.uniqueIndexDecoratorManager.setFieldNode(updatedPropertyDeclarationNode);
+      // Apply the unique index decorator changes at the class node level
+      const [updatedClassNode, uniqueIndexDecoratorChanges] =  this.uniqueIndexDecoratorChanges();
+      changes.push(...uniqueIndexDecoratorChanges);
+      changes.push(...this.calculateReplaceChanges(this.printNode(updatedClassNode, source), this.getClassNode(this.modelName, source), source)); //FIXME: avoid this.modelName to passed in for avoiding statefullness
+    }
+    else {
+      changes.push (...this.calculateReplaceChanges(this.printNode(updatedPropertyDeclarationNode, source), fieldPropertyDeclarationNode, source));
+    }
     return {
       filePath: source.fileName,
       field: field,
