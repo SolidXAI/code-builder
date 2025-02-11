@@ -92,7 +92,7 @@ export class MaxDecoratorManager implements DecoratorManager {
     }
 
     // Re-create the column decorator with the merged column decorator options
-    const decoratorIdentifier = ts.factory.createIdentifier("Max");
+    const decoratorIdentifier = ts.factory.createIdentifier(this.decoratorName());
     const argumentsArray: ts.Expression[] = [];
     const max = ts.factory.createNumericLiteral(this.options.max);
     argumentsArray.push(max);
