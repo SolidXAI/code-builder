@@ -40,9 +40,9 @@ export class <%= classify(model) %>Controller {
   }
 
   @ApiBearerAuth("jwt")
-  @Get('/bulk-recover')
-  async recoverMany() {
-    return this.service.recoverMany();
+  @Post('/bulk-recover')
+  async recoverMany(@Body() ids: number[]) {
+    return this.service.recoverMany(ids);
   }
 
   @ApiBearerAuth("jwt")
