@@ -38,6 +38,18 @@ export class <%= classify(model) %>Controller {
   partialUpdate(@Param('id') id: number, @Body() updateDto: Update<%= classify(model) %>Dto, @UploadedFiles() files: Array<Express.Multer.File>) {
     return this.service.update(id, updateDto, files, true);
   }
+
+  @ApiBearerAuth("jwt")
+  @Get('/bulk-recover')
+  async recoverMany() {
+    return this.service.recoverMany();
+  }
+
+  @ApiBearerAuth("jwt")
+  @Get('/recover/:id')
+  async recover(@Param('id') id: number) {
+    return this.service.recover(id);
+  }
     
   @ApiBearerAuth("jwt")
   @ApiQuery({ name: 'showSoftDeleted', required: false, type: Boolean })
