@@ -5,8 +5,8 @@ import { <%= classify(model) %>Service } from '../services/<%= dasherize(model) 
 import { Create<%= classify(model) %>Dto } from '../dtos/create-<%= dasherize(model) %>.dto';
 import { Update<%= classify(model) %>Dto } from '../dtos/update-<%= dasherize(model) %>.dto';
 
-@ApiTags('<%= moduleDisplayName %>') 
-@Controller('<%= dasherize(model) %>') //FIXME: Change this to the model plural name 
+@ApiTags('<%= moduleDisplayName.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") %>')
+@Controller('<%= dasherize(model) %>')
 export class <%= classify(model) %>Controller {
   constructor(private readonly service: <%= classify(model) %>Service) {}
 
@@ -73,6 +73,7 @@ export class <%= classify(model) %>Controller {
     return this.service.findOne(+id, query);
   }
 
+  @ApiBearerAuth("jwt")
   @Delete('/bulk')
   async deleteMany(@Body() ids: number[]) {
     return this.service.deleteMany(ids);
