@@ -5,7 +5,7 @@ import { <%= classify(model) %>Service } from '../services/<%= dasherize(model) 
 import { Create<%= classify(model) %>Dto } from '../dtos/create-<%= dasherize(model) %>.dto';
 import { Update<%= classify(model) %>Dto } from '../dtos/update-<%= dasherize(model) %>.dto';
 
-@ApiTags('<%= moduleDisplayName.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") %>')
+@ApiTags('<%= unSnakeCase(moduleDisplayName) %>')
 @Controller('<%= dasherize(model) %>')
 export class <%= classify(model) %>Controller {
   constructor(private readonly service: <%= classify(model) %>Service) {}
