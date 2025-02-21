@@ -484,3 +484,7 @@ export function takeBackupIfChecksumsMismatch(tree: Tree, moduleName: string) {
 export function calculateModuleFileImportPath(moduleName: string, internalPath: string) {
  return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
 }
+
+export function unSnakeCase(name: string) {
+  return name.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+}
