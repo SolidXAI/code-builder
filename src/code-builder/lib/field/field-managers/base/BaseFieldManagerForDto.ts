@@ -192,9 +192,11 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
 
   private buildPropertyLine(fieldName: string, fieldType: string, defaultConfigValue: string) {
     let entityPropertyLine = `${fieldName}: ${fieldType}`;
-    const defaultValue = this.defaultValueInitializer(defaultConfigValue)?.text ?? null;
-    if (defaultValue) {
-      entityPropertyLine += ` = ${defaultValue}`;
+    if (this.options.sourceType === DtoSourceType.Create) {
+      const defaultValue = this.defaultValueInitializer(defaultConfigValue)?.text ?? null;
+      if (defaultValue) {
+        entityPropertyLine += ` = ${defaultValue}`;
+      }
     }
     entityPropertyLine += ';';
     return entityPropertyLine;

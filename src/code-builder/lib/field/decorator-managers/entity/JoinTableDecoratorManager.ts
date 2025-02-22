@@ -10,8 +10,8 @@ interface JoinTableDecoratorOptions {
     fieldName: string;
     modelName: string;
     relationJoinTableName: string;
-    relationTableModelName: string;
-    relationTableModelNameInverse: string;
+    relationJoinColumnName: string;
+    joinColumnName: string;
 }
 
 export class JoinTableDecoratorManager implements DecoratorManager {
@@ -102,15 +102,15 @@ export class JoinTableDecoratorManager implements DecoratorManager {
             options['name'] = `${this.options.relationJoinTableName}`;
         }
     
-        if (this.options.relationTableModelName) {
+        if (this.options.relationJoinColumnName) {
             options['joinColumn'] = {
-                name: `${this.options.relationTableModelName}_id`,
+                name: `${this.options.relationJoinColumnName}_id`,
             };
         }
     
-        if (this.options.relationTableModelNameInverse) {
+        if (this.options.joinColumnName) {
             options['inverseJoinColumn'] = {
-                name: `${this.options.relationTableModelNameInverse}_id`,
+                name: `${this.options.joinColumnName}_id`,
             };
         }
     
@@ -140,28 +140,28 @@ export class JoinTableDecoratorManager implements DecoratorManager {
             );
         }
     
-        if (this.options.relationTableModelName) {
+        if (this.options.relationJoinColumnName) {
             newRelationOptions.push(
                 ts.factory.createPropertyAssignment(
                     'joinColumn',
                     ts.factory.createObjectLiteralExpression([
                         ts.factory.createPropertyAssignment(
                             'name',
-                            ts.factory.createStringLiteral(`${this.options.relationTableModelName}_id`)
+                            ts.factory.createStringLiteral(`${this.options.relationJoinColumnName}_id`)
                         ),
                     ])
                 )
             );
         }
     
-        if (this.options.relationTableModelNameInverse) {
+        if (this.options.joinColumnName) {
             newRelationOptions.push(
                 ts.factory.createPropertyAssignment(
                     'inverseJoinColumn',
                     ts.factory.createObjectLiteralExpression([
                         ts.factory.createPropertyAssignment(
                             'name',
-                            ts.factory.createStringLiteral(`${this.options.relationTableModelNameInverse}_id`)
+                            ts.factory.createStringLiteral(`${this.options.joinColumnName}_id`)
                         ),
                     ])
                 )
