@@ -84,6 +84,7 @@ export enum DecoratorType {
   BigInt = "bigint",
   MinLength = 'minLength',
   MaxLength = 'maxLength',
+  ApiProperty = 'apiProperty'
 }
 
 export enum DeleteType {

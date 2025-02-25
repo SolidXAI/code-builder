@@ -41,6 +41,7 @@ import { ValidateNestedDecoratorManager } from '../../decorator-managers/dto/Val
 import { BigIntDecoratorManager } from '../../decorator-managers/dto/BigIntDecoratorManager';
 import { MaxLengthDecoratorManager } from '../../decorator-managers/dto/MaxLengthDecoratorManager';
 import { MinLengthDecoratorManager } from '../../decorator-managers/dto/MinLengthDecoratorManager';
+import { ApiPropertyDecoratorManager } from '../../decorator-managers/dto/ApiPropertyDecoratorManager';
 
 // This class manages the field generation for the DTOs
 // It adds validation decorators to the fields
@@ -79,6 +80,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
       DecoratorType.Date,
       DecoratorType.Boolean,
       DecoratorType.Json,
+      DecoratorType.ApiProperty
     );
   }
 
@@ -190,9 +192,11 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
 
   private buildPropertyLine(fieldName: string, fieldType: string, defaultConfigValue: string) {
     let entityPropertyLine = `${fieldName}: ${fieldType}`;
-    const defaultValue = this.defaultValueInitializer(defaultConfigValue)?.text ?? null;
-    if (defaultValue) {
-      entityPropertyLine += ` = ${defaultValue}`;
+    if (this.options.sourceType === DtoSourceType.Create) {
+      const defaultValue = this.defaultValueInitializer(defaultConfigValue)?.text ?? null;
+      if (defaultValue) {
+        entityPropertyLine += ` = ${defaultValue}`;
+      }
     }
     entityPropertyLine += ';';
     return entityPropertyLine;
@@ -338,6 +342,10 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     return false;
   }
 
+  protected isApplyApiProperty(): boolean { // Not keeping this abstract, as this abstract approach will be deprecated in future
+    return true;
+  }
+
   protected applyUpdateDecoratorTransformations(fieldPropertyDeclarationNode: ts.PropertyDeclaration, ...transformers: DecoratorManager[]): [ts.PropertyDeclaration, Change[]] {
     let updatedPropertyDeclarationNode = fieldPropertyDeclarationNode;
     const changes: Change[] = [];
@@ -453,6 +461,8 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
           return new ArrayDecoratorManager({ isArray: true, source: source, field: field });
         case DecoratorType.ValidateNested:
           return new ValidateNestedDecoratorManager({ isValidateNested: true, source: source, field: field });
+        case DecoratorType.ApiProperty:
+          return new ApiPropertyDecoratorManager({ isApplyApiProperty: this.isApplyApiProperty(), source: source, field: field });
       }
     });
   }
