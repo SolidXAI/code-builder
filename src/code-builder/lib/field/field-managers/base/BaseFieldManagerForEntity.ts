@@ -88,7 +88,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     );
     this.joinColumnDecoratorManager = new JoinColumnDecoratorManager(
       {
-        isManyToOneRelationOwner: this.field.relationType === RelationType.ManyToOne,
+        isManyToOneRelationOwner: this.isManyToOne(),
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
@@ -101,7 +101,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         relationModelName: this.field.relationModelSingularName,
         relationInverseFieldName: this.field.relationModelFieldName,
         relationCascade: this.field.relationCascade,
-        owner: true,
+        owner: this.field.isRelationManyToManyOwner,
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
@@ -110,7 +110,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     );
     this.joinTableDecoratorManager = new JoinTableDecoratorManager(
       {
-        isManyToManyRelationOwner: this.field.relationType === RelationType.ManyToMany,
+        isManyToManyRelationOwner: this.isManyToMany() && this.field.isRelationManyToManyOwner,
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
