@@ -6,25 +6,9 @@ import {
   BaseFieldManagerForEntity,
 } from '../base/BaseFieldManagerForEntity';
 
-export class ManyToOneRelationFieldManagerForEntity
+export class OneToManyRelationFieldManagerForEntity
   extends BaseFieldManagerForEntity
   implements FieldManager {
-
-  fieldType(): FieldType {
-    return this.manyToOneFieldType();
-  }
-
-  private manyToOneFieldType(): FieldType {
-    return {
-      text: classify(this.field.relationModelSingularName),
-      node: (field: any) => ts.factory.createTypeReferenceNode(
-        ts.factory.createIdentifier(
-          classify(field.relationModelSingularName)
-        ),
-        undefined
-      ),
-    };
-  }
 
   override addField(): FieldChange[] {
     const fieldChanges = super.addField();
@@ -50,5 +34,18 @@ export class ManyToOneRelationFieldManagerForEntity
     return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath, this.moduleName);
   }
 
-  
+
+  fieldType(): FieldType { // The inverse field type will remain the same for both one-to-many and many-to-many relations
+    const type = `${classify(this.field.relationModelSingularName)}`
+    const text = `${type}[]`
+    return {
+      text: text,
+      node: (_field: any) =>
+        ts.factory.createArrayTypeNode(ts.factory.createTypeReferenceNode(
+          ts.factory.createIdentifier(type),
+          undefined
+        )),
+    };
+  }
+
 }
