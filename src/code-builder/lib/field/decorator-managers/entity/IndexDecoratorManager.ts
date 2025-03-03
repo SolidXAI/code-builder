@@ -13,7 +13,7 @@ export class IndexDecoratorManager implements DecoratorManager {
 
     constructor(public options: IndexDecoratorOptions, public fieldNode?: PropertyDeclaration) { }
     isApplyDecorator(): boolean {
-        return this.options.index && this.options.field.relationType !== RelationType.ManyToMany;
+        return this.options.index && this.options.field.relationType !== RelationType.ManyToMany && this.options.field.relationType !== RelationType.OneToMany;
     }
     decoratorName(): string {
         return 'Index';
