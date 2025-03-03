@@ -1,4 +1,3 @@
-import { classify } from '@angular-devkit/core/src/utils/strings';
 import { Tree } from '@angular-devkit/schematics';
 import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { OptionalDecoratorManager } from '../../decorator-managers/dto/OptionalDecoratorManager';

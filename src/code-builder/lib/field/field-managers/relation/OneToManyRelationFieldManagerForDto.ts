@@ -39,7 +39,7 @@ export class OneToManyRelationFieldManagerForDto
     return false;
   }
   isInt(): boolean {
-    return true;
+    return false;
   }
   isDecimal(): boolean {
     return false;
@@ -48,7 +48,7 @@ export class OneToManyRelationFieldManagerForDto
     return false;
   }
   isApplyRequired(): boolean {
-    return true;
+    return false;
   }
   isApplyMin(): boolean {
     return false;
@@ -231,11 +231,6 @@ export class OneToManyRelationFieldManagerForDto
     const fieldName = `${this.field.name}Command`;
     const source = this.source;
     return this.removeFieldFor(fieldName, source);
-  }
-
-
-  override fieldName(): string {
-    return `${this.field.name}Id`;
   }
 
   protected isAdditionalFieldRequired(): boolean {
