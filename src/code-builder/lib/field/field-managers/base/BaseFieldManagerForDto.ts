@@ -1,6 +1,7 @@
 import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
 import { Tree } from '@angular-devkit/schematics';
 import ts, {
+  ClassDeclaration,
   PropertyDeclaration,
   SourceFile,
 } from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
@@ -137,7 +138,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
   protected addFieldInternal(fieldName: string, fieldType: string, decoratorManagers: DecoratorManager[], field: any, modelName: any, source: ts.SourceFile): FieldChange {
     //FIXME There might a case where the main field is not present, but additional field is present. Do we update the fields or throw an error. Needs to be discussed
     // For now, we assume, that if primary field is not present, then additional field is also not present
-    if (this.isFieldPresent(fieldName, source)) { 
+    if (this.isFieldPresent(fieldName, source)) {
       return {
         filePath: source.fileName,
         field: field,
@@ -166,14 +167,8 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
       fieldSourceLines.push(...builderChange.fieldSourceLines);
     });
 
-    // Create the field definition changes
-    // const classNode = findNodes(source, ts.SyntaxKind.ClassDeclaration)[0];
-    const className = (this.options.sourceType === DtoSourceType.Create) ? `Create${classify(modelName)}Dto` : `Update${classify(modelName)}Dto`;
-    const classNode = getClassNode(className,source);
-    if (!classNode) {
-      throw new Error(`Class ${className} not found in file ${source.fileName}`);
-    }
-    
+    const classNode = this.getClassNode(modelName, this.options, source);
+
     const fieldDefinition = `\n${fieldSourceLines.reverse().join('\n')}\n`;
     changes.push(
       new InsertChange(
@@ -208,9 +203,9 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
 
     const fieldName = this.fieldName();
     const fieldType = this.fieldType().text;
-    const source= this.source
+    const source = this.source
     const field = this.field
-    const modelName = this.modelName        
+    const modelName = this.modelName
     const decoratorManagers = this.decoratorManagers;
 
     fieldChanges.push(this.addFieldInternal(fieldName, fieldType, decoratorManagers, field, modelName, source));
@@ -241,13 +236,50 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     updatedPropertyDeclarationNode = updatedPropertyDeclarationNodeTransformed;
     changes.push(...decoratorChanges);
 
-    changes.push(...this.calculateReplaceChanges(this.printNode(updatedPropertyDeclarationNode, source), fieldPropertyDeclarationNode, source));
+    // changes.push(...this.calculateReplaceChanges(this.printNode(updatedPropertyDeclarationNode, source), fieldPropertyDeclarationNode, source));
+
+    if (!this.isAdditionalFieldRequired()) {
+      // Get the source class node i.e CreateDto or UpdateDto
+      const sourceClassNode = this.getClassNode(this.modelName, this.options, source); // FIXME Avoid this.model to avoid stateful behaviour
+      // Set the updated property declaration node to the source class node
+      const updatedClassNode = this.updateClassNode(sourceClassNode, updatedPropertyDeclarationNode, fieldName);
+      changes.push(...this.calculateReplaceChanges(this.printNode(updatedClassNode, source), sourceClassNode, source)); 
+    }
+    else {
+      changes.push(...this.calculateReplaceChanges(this.printNode(updatedPropertyDeclarationNode, source), fieldPropertyDeclarationNode, source));
+    }
 
     return {
       filePath: source.fileName,
       field: field,
       changes: changes,
     };
+  }
+
+  updateClassNode(sourceClassNode: ts.ClassDeclaration, updatedFieldNode: ts.PropertyDeclaration, fieldName: string): ClassDeclaration {
+    // Replace the class memeber matching the field name with the updated field node
+    const newMembers = sourceClassNode.members.map((member) => {
+      // Check if the member is a PropertyDeclaration
+      if (ts.isPropertyDeclaration(member)) {
+        // Compare the name of the property with the field name
+        const memberName = member.name.getText();
+        if (memberName === fieldName) {
+          return updatedFieldNode!;
+        }
+      }
+      return member;
+    });
+
+    // Update the class node with the new modifiers
+    const updatedClass = ts.factory.updateClassDeclaration(
+      sourceClassNode,
+      sourceClassNode.modifiers,
+      sourceClassNode.name,
+      sourceClassNode.typeParameters,
+      sourceClassNode.heritageClauses,
+      newMembers,
+    );
+    return updatedClass;
   }
 
   updateField(): FieldChange[] {
@@ -257,7 +289,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
 
     const fieldName = this.fieldName();
     const fieldType = this.fieldType().node(this.field);
-    const source= this.source
+    const source = this.source
     const field = this.field
     const decoratorManagers = this.decoratorManagers;
 
@@ -365,7 +397,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
         }
       }
     }
-  }  
+  }
 
   protected applyBuildDecoratorTransformations(...transformers: DecoratorManager[]): PartialAddFieldChange[] {
     const partialFieldChanges: PartialAddFieldChange[] = [];
@@ -385,16 +417,16 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     }
   }
 
-  protected calculateReplaceChanges(updatedPropertyDeclarationNodeText: string, fieldPropertyDeclarationNode: ts.PropertyDeclaration, source: ts.SourceFile): Change[] {
+  protected calculateReplaceChanges(updatedPropertyDeclarationNodeText: string, sourceNode: ts.Node, source: ts.SourceFile): Change[] {
     const changes: Change[] = [];
     if (updatedPropertyDeclarationNodeText.trim() !==
-      fieldPropertyDeclarationNode.getFullText().trim()) {
+      sourceNode.getFullText().trim()) {
       console.log(`Updated Code:\n${updatedPropertyDeclarationNodeText.trim()}\nwith length ${updatedPropertyDeclarationNodeText.trim().length}\n`);
-      console.log(`Old Code:\n${fieldPropertyDeclarationNode.getFullText().trim()}\nwith length ${fieldPropertyDeclarationNode.getFullText().trim().length}\n`);
+      console.log(`Old Code:\n${sourceNode.getFullText().trim()}\nwith length ${sourceNode.getFullText().trim().length}\n`);
       const replaceChange = new ReplaceChangeSSS(
         source.fileName,
-        fieldPropertyDeclarationNode.pos,
-        fieldPropertyDeclarationNode.getFullText(),
+        sourceNode.pos,
+        sourceNode.getFullText(),
         `\n\n${updatedPropertyDeclarationNodeText}`
       );
       changes.push(replaceChange);
@@ -402,7 +434,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     return changes;
   }
 
-  protected printNode(updatedPropertyDeclarationNode: ts.PropertyDeclaration, nodeSource: SourceFile): string {
+  protected printNode(updatedPropertyDeclarationNode: ts.Node, nodeSource: SourceFile): string {
     const printer = ts.createPrinter({
       newLine: ts.NewLineKind.LineFeed,
       removeComments: false,
@@ -432,7 +464,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
         case DecoratorType.MinLength:
           return new MinLengthDecoratorManager({ isApplyMinLength: this.isApplyMinLength(), length: field.min, source: source, field: field });
         case DecoratorType.MaxLength:
-          return new MaxLengthDecoratorManager({ isApplyMaxLength: this.isApplyMaxLength(), length: field.max, source: source, field: field });  
+          return new MaxLengthDecoratorManager({ isApplyMaxLength: this.isApplyMaxLength(), length: field.max, source: source, field: field });
         case DecoratorType.Required:
           return new RequiredDecoratorManager({ isApplyRequired: true, required: field.required, source: source, field: field });
         case DecoratorType.Optional:
@@ -447,7 +479,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
           return new IntDecoratorManager({ isInt: this.isInt(), source: source, field: field });
         case DecoratorType.Decimal:
           return new DecimalDecoratorManager({ isDecimal: this.isDecimal(), source: source, field: field });
-        case DecoratorType.BigInt:  
+        case DecoratorType.BigInt:
           return new BigIntDecoratorManager({ isBigInt: this.isBigInt(), source: source, field: field });
         case DecoratorType.Date:
           return new DateDecoratorManager({ isDate: this.isDate(), source: source, field: field });
@@ -480,6 +512,16 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
       text: `"${defaultValue.toString()}"`,
       expression: ts.factory.createStringLiteral(defaultValue.toString())
     }
+  }
+
+  private getClassNode(modelName: any, options: ManagerForDtoOptions, source: ts.SourceFile) {
+    const classifiedModelName = classify(modelName);
+    const sourceClassName = (options.sourceType === DtoSourceType.Create) ? `Create${classifiedModelName}Dto` : `Update${classifiedModelName}Dto`;
+    const classNode = getClassNode(sourceClassName, source);
+    if (!classNode) {
+      throw new Error(`Class ${sourceClassName} not found in file ${source.fileName}`);
+    }
+    return classNode;
   }
 
 }
