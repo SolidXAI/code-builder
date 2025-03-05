@@ -49,6 +49,7 @@ import { ApiPropertyDecoratorManager } from '../../decorator-managers/dto/ApiPro
 // The validation decorators added use the class-validator library
 export abstract class BaseFieldManagerForDto implements FieldManager {
   source: SourceFile;
+  updatedSourceClassNode?: ts.ClassDeclaration;
   decoratorManagers: DecoratorManager[];
 
   constructor(
@@ -238,16 +239,18 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
 
     // changes.push(...this.calculateReplaceChanges(this.printNode(updatedPropertyDeclarationNode, source), fieldPropertyDeclarationNode, source));
 
-    if (!this.isAdditionalFieldRequired()) {
+    // if (!this.isAdditionalFieldRequired()) {
       // Get the source class node i.e CreateDto or UpdateDto
       const sourceClassNode = this.getClassNode(this.modelName, this.options, source); // FIXME Avoid this.model to avoid stateful behaviour
+      const classNode = this.updatedSourceClassNode ?? sourceClassNode;
       // Set the updated property declaration node to the source class node
-      const updatedClassNode = this.updateClassNode(sourceClassNode, updatedPropertyDeclarationNode, fieldName);
-      changes.push(...this.calculateReplaceChanges(this.printNode(updatedClassNode, source), sourceClassNode, source)); 
-    }
-    else {
-      changes.push(...this.calculateReplaceChanges(this.printNode(updatedPropertyDeclarationNode, source), fieldPropertyDeclarationNode, source));
-    }
+      const updatedClassNode = this.updateClassNode(classNode, updatedPropertyDeclarationNode, fieldName);
+      this.updatedSourceClassNode = updatedClassNode; // Set the updated class node to the source class node, so it can be used for additional operations e.g for additional field updates
+      changes.push(...this.calculateReplaceChanges(this.printNode(updatedClassNode, source), sourceClassNode, source.fileName)); 
+    // }
+    // else {
+    //   changes.push(...this.calculateReplaceChanges(this.printNode(updatedPropertyDeclarationNode, source), fieldPropertyDeclarationNode, source.fileName));
+    // }
 
     return {
       filePath: source.fileName,
@@ -417,17 +420,17 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     }
   }
 
-  protected calculateReplaceChanges(updatedPropertyDeclarationNodeText: string, sourceNode: ts.Node, source: ts.SourceFile): Change[] {
+  protected calculateReplaceChanges(updatedSourceNodeText: string, sourceNode:ts.Node, sourceFileName: string): Change[] {
     const changes: Change[] = [];
-    if (updatedPropertyDeclarationNodeText.trim() !==
+    if (updatedSourceNodeText.trim() !==
       sourceNode.getFullText().trim()) {
-      console.log(`Updated Code:\n${updatedPropertyDeclarationNodeText.trim()}\nwith length ${updatedPropertyDeclarationNodeText.trim().length}\n`);
+      console.log(`Updated Code:\n${updatedSourceNodeText.trim()}\nwith length ${updatedSourceNodeText.trim().length}\n`);
       console.log(`Old Code:\n${sourceNode.getFullText().trim()}\nwith length ${sourceNode.getFullText().trim().length}\n`);
       const replaceChange = new ReplaceChangeSSS(
-        source.fileName,
+        sourceFileName,
         sourceNode.pos,
         sourceNode.getFullText(),
-        `\n\n${updatedPropertyDeclarationNodeText}`
+        `\n\n${updatedSourceNodeText}`
       );
       changes.push(replaceChange);
     }
@@ -515,6 +518,9 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
   }
 
   private getClassNode(modelName: any, options: ManagerForDtoOptions, source: ts.SourceFile) {
+    // if (this.updatedSourceClassNode) {
+    //   return this.updatedSourceClassNode;
+    // }
     const classifiedModelName = classify(modelName);
     const sourceClassName = (options.sourceType === DtoSourceType.Create) ? `Create${classifiedModelName}Dto` : `Update${classifiedModelName}Dto`;
     const classNode = getClassNode(sourceClassName, source);
