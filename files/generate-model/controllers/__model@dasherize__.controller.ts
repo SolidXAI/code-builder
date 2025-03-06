@@ -5,6 +5,11 @@ import { <%= classify(model) %>Service } from '../services/<%= dasherize(model) 
 import { Create<%= classify(model) %>Dto } from '../dtos/create-<%= dasherize(model) %>.dto';
 import { Update<%= classify(model) %>Dto } from '../dtos/update-<%= dasherize(model) %>.dto';
 
+enum ShowSoftDeleted {
+  INCLUSIVE = "inclusive",
+  EXCLUSIVE = "exclusive",
+}
+
 @ApiTags('<%= unSnakeCase(moduleDisplayName) %>')
 @Controller('<%= dasherize(model) %>')
 export class <%= classify(model) %>Controller {
@@ -52,8 +57,7 @@ export class <%= classify(model) %>Controller {
   }
     
   @ApiBearerAuth("jwt")
-  @ApiQuery({ name: 'showSoftDeleted', required: false, type: Boolean })
-  @ApiQuery({ name: 'showOnlySoftDeleted', required: false, type: Boolean })
+  @ApiQuery({ name: 'showSoftDeleted', required: false, enum: ShowSoftDeleted })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'offset', required: false, type: Number })
   @ApiQuery({ name: 'fields', required: false, type: Array })
