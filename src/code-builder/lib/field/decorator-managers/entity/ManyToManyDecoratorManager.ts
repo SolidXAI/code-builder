@@ -8,7 +8,6 @@ interface ManyToManyDecoratorOptions {
     isManyToMany: boolean;
     relationModelName: string;
     relationInverseFieldName: string;
-    relationCascade: DeleteType;
     owner: boolean;
     source: ts.SourceFile;
     field: any;

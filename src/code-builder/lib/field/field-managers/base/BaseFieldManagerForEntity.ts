@@ -102,7 +102,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         isManyToMany: this.isManyToMany(),
         relationModelName: this.field.relationModelSingularName,
         relationInverseFieldName: this.field.relationModelFieldName,
-        relationCascade: this.field.relationCascade,
         owner: this.field.isRelationManyToManyOwner,
         source: this.source,
         field: this.field,
@@ -129,7 +128,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     this.oneToManyDecoratorManager = new OneToManyDecoratorManager(
       {
         isOneToMany: this.isOneToMany(),
-        relationCascade: this.field.relationCascade,
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),

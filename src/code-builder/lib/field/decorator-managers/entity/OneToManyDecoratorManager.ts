@@ -6,7 +6,6 @@ import { DecoratorManager, DeleteType, PartialAddFieldChange } from "../../Field
 
 interface OneToManyDecoratorOptions {
     isOneToMany: boolean;
-    relationCascade: DeleteType;
     source: ts.SourceFile;
     field: any;
     fieldName: string;
