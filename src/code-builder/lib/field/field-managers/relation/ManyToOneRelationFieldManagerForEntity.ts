@@ -21,7 +21,7 @@ export class ManyToOneRelationFieldManagerForEntity
   constructor(tree: Tree, moduleName: string, modelName: string, field: any) {
     super(tree, moduleName, modelName, field);
     if (this.isAdditionalFieldRequired()) {
-      const relatedEntityFileName = `${dasherize(this.field.relationModelSingularName)}.entity.ts`;
+      const relatedEntityFileName = `${dasherize(this.field.relationCoModelSingularName)}.entity.ts`;
       const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/entities/${relatedEntityFileName}` : `src/${dasherize(moduleName)}/entities/${relatedEntityFileName}`;
       this.relationInverseSource = createSourceFile( //TODO "src/iam/dtos/create-user.dto.ts" does not exist. If an entity is used in a many-to-one relation, the create-entity.dto.ts file should be exist.
         tree,
@@ -66,10 +66,10 @@ export class ManyToOneRelationFieldManagerForEntity
 
   private manyToOneFieldType(): FieldType {
     return {
-      text: classify(this.field.relationModelSingularName),
+      text: classify(this.field.relationCoModelSingularName),
       node: (field: any) => ts.factory.createTypeReferenceNode(
         ts.factory.createIdentifier(
-          classify(field.relationModelSingularName)
+          classify(field.relationCoModelSingularName)
         ),
         undefined
       ),
@@ -77,7 +77,7 @@ export class ManyToOneRelationFieldManagerForEntity
   }
 
   private manyToManyFieldType(): FieldType {
-    const type = `${classify(this.field.relationModelSingularName)}`
+    const type = `${classify(this.field.relationCoModelSingularName)}`
     const text = `${type}[]`
     return {
       text: text,
@@ -92,7 +92,7 @@ export class ManyToOneRelationFieldManagerForEntity
 
   override addField(): FieldChange[] {
     const fieldChanges = super.addField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) { 
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) { 
       const mainField = fieldChanges[0]; // The 1st field change is the main field change, related to the entity source file
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -101,7 +101,7 @@ export class ManyToOneRelationFieldManagerForEntity
 
   override updateField(): FieldChange[] {
     const fieldChanges = super.updateField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) { 
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) { 
       const mainField = fieldChanges[0]; // The 1st field change is the main field change, related to the entity source file
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -109,9 +109,9 @@ export class ManyToOneRelationFieldManagerForEntity
   }
 
   relatedFieldImport(): Change {
-    const relatedEntityImportName = `${dasherize(this.field.relationModelSingularName)}.entity`;
+    const relatedEntityImportName = `${dasherize(this.field.relationCoModelSingularName)}.entity`;
     const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-    return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath, this.moduleName);
+    return safeInsertImport(this.source, classify(this.field.relationCoModelSingularName), relatedEntityPath, this.moduleName);
   }
 
   private isOneToMany(): boolean {
@@ -150,11 +150,11 @@ export class ManyToOneRelationFieldManagerForEntity
     const fieldType = this.additionalFieldType().text;
     const source= this.relationInverseSource
     const field = this.field
-    const modelName = this.field.relationModelSingularName        
+    const modelName = this.field.relationCoModelSingularName        
     const decoratorManagers = this.additionalDecoratorManagers();
 
     const fieldChange = this.addFieldInternal(fieldName, fieldType, decoratorManagers, field, modelName, source);
-    if (this.modelName !== this.field.relationModelSingularName) {
+    if (this.modelName !== this.field.relationCoModelSingularName) {
       const currentModelName = this.modelName;
       const currentModuleName = this.moduleName; 
       fieldChange.changes.push(this.inverseFieldImport(currentModelName, currentModuleName, source));
@@ -192,7 +192,7 @@ export class ManyToOneRelationFieldManagerForEntity
     }
     else {
       const fieldChange = this.updateFieldInternal(fieldName, fieldType, decoratorManagers, field, source); 
-      if (this.modelName !== this.field.relationModelSingularName) {
+      if (this.modelName !== this.field.relationCoModelSingularName) {
         const currentModelName = this.modelName;
         const currentModuleName = this.moduleName; 
         fieldChange.changes.push(this.inverseFieldImport(currentModelName, currentModuleName, source));
@@ -202,7 +202,7 @@ export class ManyToOneRelationFieldManagerForEntity
   }
 
   additionalFieldName(): string { // The inverse field type will remain the same for both one-to-many and many-to-many relations
-    return this.field.relationModelFieldName ?? `${this.modelName}s`;
+    return this.field.relationCoModelFieldName ?? `${this.modelName}s`;
   }
 
   additionalFieldType(): FieldType { // The inverse field type will remain the same for both one-to-many and many-to-many relations

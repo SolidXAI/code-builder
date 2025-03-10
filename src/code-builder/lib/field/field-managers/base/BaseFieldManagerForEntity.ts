@@ -50,7 +50,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       tree,
       `src/${dasherize(moduleName)}/entities/${dasherize(modelName)}.entity.ts`,
     );
-
+    console.log('this.field.columnName', this.field);
     const fieldPropertyDeclarationNode = this.getFieldIdentifierNode(
       this.fieldName(),
       this.source
@@ -76,7 +76,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     this.manyToOneDecoratorManager = new ManyToOneDecoratorManager(
       {
         isManyToOne: this.isManyToOne(),
-        relationModelSingularName: this.field.relationModelSingularName,
+        relationCoModelSingularName: this.field.relationCoModelSingularName,
         relationCascade: this.field.relationCascade,
         required: this.field.required,
         source: this.source,
@@ -86,20 +86,21 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       },
       fieldPropertyDeclarationNode,
     );
+    console.log('this.field.columnName', this.field);
     this.joinColumnDecoratorManager = new JoinColumnDecoratorManager(
       {
         isManyToOneRelationOwner: this.field.relationType === RelationType.ManyToOne,
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
-        relationModelFieldName: this.field.relationModelFieldName
+        relationCoModelFieldName: this.field.columnName
       },
     );
     this.manyToManyDecoratorManager = new ManyToManyDecoratorManager(
       {
         isManyToMany: this.isManyToMany(),
-        relationModelName: this.field.relationModelSingularName,
-        relationInverseFieldName: this.field.relationModelFieldName,
+        relationModelName: this.field.relationCoModelSingularName,
+        relationInverseFieldName: this.field.relationCoModelFieldName,
         relationCascade: this.field.relationCascade,
         owner: true,
         source: this.source,
@@ -444,7 +445,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   }
 
   protected inverseRelationFieldName(): string {
-    return `${this.field.relationModelSingularName}s`;
+    return `${this.field.relationCoModelSingularName}s`;
   }
 
 

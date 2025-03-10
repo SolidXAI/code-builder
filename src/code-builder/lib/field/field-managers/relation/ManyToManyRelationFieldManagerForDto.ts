@@ -31,12 +31,12 @@ export class ManyToManyRelationFieldManagerForDto
             // DecoratorType.Transform,
         )];
         this.decoratorManagers.push(
-            new TransformDecoratorManager({ isTransform: true, type: this.transformType(this.field.relationModelSingularName), source: this.source, field: field })
+            new TransformDecoratorManager({ isTransform: true, type: this.transformType(this.field.relationCoModelSingularName), source: this.source, field: field })
         );
         
         // TODO : inverse source file logic is required, but needs to be handled in a better way
         if (this.field.relationCreateInverse) {
-            const relatedEntityFileName = (this.options.sourceType === DtoSourceType.Create) ? `create-${dasherize(this.field.relationModelSingularName)}.dto.ts` : `update-${dasherize(this.field.relationModelSingularName)}.dto.ts`;
+            const relatedEntityFileName = (this.options.sourceType === DtoSourceType.Create) ? `create-${dasherize(this.field.relationCoModelSingularName)}.dto.ts` : `update-${dasherize(this.field.relationCoModelSingularName)}.dto.ts`;
             const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/dtos/${relatedEntityFileName}` : `src/${dasherize(moduleName)}/dtos/${relatedEntityFileName}`;
             this.relationInverseSource = createSourceFile(tree, relatedEntityPath);
             this.relationInverseDecoratorManagers = this.getFieldDecoratorManagers(
@@ -89,7 +89,7 @@ export class ManyToManyRelationFieldManagerForDto
 
     // This is the field type of the owner in the m2m relation
     fieldType(): FieldType {
-        return this.manyToManyFieldType(this.field.relationModelSingularName)
+        return this.manyToManyFieldType(this.field.relationCoModelSingularName)
     }
 
     // This field type is used in the case of one-to-many relation, when we generate the inverse field in the related entity
@@ -133,11 +133,11 @@ export class ManyToManyRelationFieldManagerForDto
     }
     
     private addAdditionalInverseIdsField(): FieldChange {
-        const fieldName = `${this.field.relationModelFieldName}Ids`;
+        const fieldName = `${this.field.relationCoModelFieldName}Ids`;
         const fieldType = "number[]";
         const source= this.relationInverseSource
         const field = this.field
-        const modelName = this.field.relationModelSingularName        
+        const modelName = this.field.relationCoModelSingularName        
         const decoratorManagers = [
             new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
             new ArrayDecoratorManager({ isArray: true, source: source, field: field })
@@ -147,11 +147,11 @@ export class ManyToManyRelationFieldManagerForDto
     }
 
     private addAdditionalInverseCommandsField(): FieldChange {
-        const fieldName = `${this.field.relationModelFieldName}Command`;
+        const fieldName = `${this.field.relationCoModelFieldName}Command`;
         const fieldType = "string";
         const source= this.relationInverseSource
         const field = this.field
-        const modelName = this.field.relationModelSingularName        
+        const modelName = this.field.relationCoModelSingularName        
         const decoratorManagers = [
             new StringDecoratorManager({ isString: true, source: source, field: field }),
             new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
@@ -203,10 +203,10 @@ export class ManyToManyRelationFieldManagerForDto
         const fieldType = this.additionalFieldType().text;
         const source= this.relationInverseSource
         const field = this.field
-        const modelName = this.field.relationModelSingularName        
+        const modelName = this.field.relationCoModelSingularName        
         const decoratorManagers = this.relationInverseDecoratorManagers
         const fieldChange =  this.addFieldInternal(fieldName, fieldType, decoratorManagers, field, modelName, source);
-        if (this.modelName !== this.field.relationModelSingularName) {
+        if (this.modelName !== this.field.relationCoModelSingularName) {
             const currentModelName = this.modelName;
             const currentModuleName = this.moduleName;
             fieldChange.changes.push(this.inverseFieldImport(currentModelName, currentModuleName, source));
@@ -232,7 +232,7 @@ export class ManyToManyRelationFieldManagerForDto
     }
 
     updateAdditionalInverseField(): FieldChange {
-       const inverseFieldName = this.field.relationModelFieldName;
+       const inverseFieldName = this.field.relationCoModelFieldName;
        const inverseFieldType = this.manyToManyFieldType(this.modelName).node(this.field);
        const source= this.relationInverseSource
        const field = this.field
@@ -248,7 +248,7 @@ export class ManyToManyRelationFieldManagerForDto
          else {
                 //Update the inverse field
                 const fieldChange = this.updateFieldInternal(inverseFieldName, inverseFieldType, inverseDecoratorManagers, field, source)
-                if (this.modelName !== this.field.relationModelSingularName) {
+                if (this.modelName !== this.field.relationCoModelSingularName) {
                     const currentModelName = this.modelName;
                     const currentModuleName = this.moduleName;
                     fieldChange.changes.push(this.inverseFieldImport(currentModelName, currentModuleName, source));
@@ -258,7 +258,7 @@ export class ManyToManyRelationFieldManagerForDto
     }
 
     updateAdditionalInverseIdsField(): FieldChange {
-        const idsFieldName = `${this.field.relationModelFieldName}Ids`
+        const idsFieldName = `${this.field.relationCoModelFieldName}Ids`
         const idsFieldType = ts.factory.createArrayTypeNode(ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword));
         const source = this.relationInverseSource
         const field = this.field
@@ -281,7 +281,7 @@ export class ManyToManyRelationFieldManagerForDto
     }
 
     updateAdditionalInverseCommandsField(): FieldChange {
-        const commandFieldName = `${this.field.relationModelFieldName}Command`
+        const commandFieldName = `${this.field.relationCoModelFieldName}Command`
         const commandFieldType = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
         const source = this.relationInverseSource
         const field = this.field
@@ -389,12 +389,12 @@ export class ManyToManyRelationFieldManagerForDto
         return this.removeFieldFor(fieldName, source);
     }
     removeAdditionalInverseIdsField(): FieldChange {
-        const fieldName = `${this.field.relationModelFieldName}Ids`;
+        const fieldName = `${this.field.relationCoModelFieldName}Ids`;
         const source = this.relationInverseSource;
         return this.removeFieldFor(fieldName, source);
     }
     removeAdditionalInverseCommandsField(): FieldChange {
-        const fieldName = `${this.field.relationModelFieldName}Command`;
+        const fieldName = `${this.field.relationCoModelFieldName}Command`;
         const source = this.relationInverseSource;
         return this.removeFieldFor(fieldName, source);
     }
@@ -405,7 +405,7 @@ export class ManyToManyRelationFieldManagerForDto
     }
 
     additionalFieldName(): string {
-        return this.field.relationModelFieldName;
+        return this.field.relationCoModelFieldName;
     }
 
     protected isAdditionalFieldRequired(): boolean {
@@ -415,7 +415,7 @@ export class ManyToManyRelationFieldManagerForDto
 
     override addField(): FieldChange[] {
         const fieldChanges: FieldChange[] = super.addField();
-        if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) {
+        if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) {
             const mainField = fieldChanges[0];
             mainField.changes.push(this.relatedFieldImport());
         }
@@ -430,7 +430,7 @@ export class ManyToManyRelationFieldManagerForDto
         // if (containsAddFieldChanges) return fieldChanges;
 
         //This line is required to add import changes in the update context
-        // if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) {
+        // if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) {
             const mainField = fieldChanges[0];
             mainField.changes.push(this.relatedFieldImport());
         // }
@@ -438,9 +438,9 @@ export class ManyToManyRelationFieldManagerForDto
     }
 
     relatedFieldImport(): Change {
-        const relatedEntityImportName = `update-${dasherize(this.field.relationModelSingularName)}.dto`;
+        const relatedEntityImportName = `update-${dasherize(this.field.relationCoModelSingularName)}.dto`;
         const relatedEntityPath = this.field.relationModelModuleName ? `src/${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-        return safeInsertImport(this.source, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
-        // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath);
+        return safeInsertImport(this.source, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
+        // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath);
     } //Uncomment this method while implementing many-to-many relation changes
 }

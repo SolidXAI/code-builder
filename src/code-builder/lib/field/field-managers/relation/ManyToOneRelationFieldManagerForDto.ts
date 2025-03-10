@@ -24,7 +24,7 @@ export class ManyToOneRelationFieldManagerForDto
   constructor(tree: Tree, moduleName: string, modelName: string, field: any, options: ManagerForDtoOptions) {
     super(tree, moduleName, modelName, {...field, required: false}, options);
     if (this.field.relationCreateInverse) {
-      const relatedEntityFileName = (this.options.sourceType === DtoSourceType.Create) ? `create-${dasherize(this.field.relationModelSingularName)}.dto.ts` : `update-${dasherize(this.field.relationModelSingularName)}.dto.ts`;
+      const relatedEntityFileName = (this.options.sourceType === DtoSourceType.Create) ? `create-${dasherize(this.field.relationCoModelSingularName)}.dto.ts` : `update-${dasherize(this.field.relationCoModelSingularName)}.dto.ts`;
       const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/dtos/${relatedEntityFileName}` : `src/${dasherize(moduleName)}/dtos/${relatedEntityFileName}`;
       this.relationInverseSource = createSourceFile(tree, relatedEntityPath);
       this.relationInverseDecoratorManagers = this.getFieldDecoratorManagers(
@@ -137,11 +137,11 @@ export class ManyToOneRelationFieldManagerForDto
   }
   
   private addAdditionalInverseCommandsField(): FieldChange {
-    const fieldName = `${this.field.relationModelFieldName ?? this.modelName}Command`;
+    const fieldName = `${this.field.relationCoModelFieldName ?? this.modelName}Command`;
     const fieldType = "string";
     const source = this.relationInverseSource;
     const field = this.field;
-    const modelName = this.field.relationModelSingularName;
+    const modelName = this.field.relationCoModelSingularName;
     const decoratorManagers = [
       new StringDecoratorManager({ isString: true, source: source, field: field }),
       new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
@@ -156,11 +156,11 @@ export class ManyToOneRelationFieldManagerForDto
   }
 
   private addAdditionalInverseIdsField(): FieldChange {
-    const fieldName = `${this.field.relationModelFieldName ?? this.modelName}Ids`;
+    const fieldName = `${this.field.relationCoModelFieldName ?? this.modelName}Ids`;
     const fieldType = "number[]";
     const source = this.relationInverseSource;
     const field = this.field;
-    const modelName = this.field.relationModelSingularName;
+    const modelName = this.field.relationCoModelSingularName;
     const decoratorManagers = [
       new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
       new ArrayDecoratorManager({ isArray: true, source: source, field: field })
@@ -178,12 +178,12 @@ export class ManyToOneRelationFieldManagerForDto
     const fieldType = this.additionalFieldType().text;
     const source = this.relationInverseSource;
     const field = this.field;
-    const modelName = this.field.relationModelSingularName;
+    const modelName = this.field.relationCoModelSingularName;
     const decoratorManagers = this.relationInverseDecoratorManagers;
     //console.log(`\ncreate Dto addAdditionalInverseField ${fieldName} called ...`);
     const fieldChange = this.addFieldInternal(fieldName, fieldType, decoratorManagers, field, modelName, source);
 
-    if (this.modelName !== this.field.relationModelSingularName) {
+    if (this.modelName !== this.field.relationCoModelSingularName) {
       const currentModelName = this.modelName;
       const currentModuleName = this.moduleName;
       fieldChange.changes.push(this.inverseFieldImport(currentModelName, currentModuleName, source));
@@ -232,7 +232,7 @@ export class ManyToOneRelationFieldManagerForDto
 
   private updateAdditionalInverseCommandsField(): FieldChange {
 
-        const commandFieldName = `${this.field.relationModelFieldName ?? this.modelName}Command`
+        const commandFieldName = `${this.field.relationCoModelFieldName ?? this.modelName}Command`
         const commandFieldType = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
         const source = this.relationInverseSource
         const field = this.field
@@ -258,7 +258,7 @@ export class ManyToOneRelationFieldManagerForDto
   }
 
   private updateAdditionalInverseIdsField(): FieldChange {
-    const idsFieldName = `${this.field.relationModelFieldName ?? this.modelName}Ids`
+    const idsFieldName = `${this.field.relationCoModelFieldName ?? this.modelName}Ids`
     const idsFieldType = ts.factory.createArrayTypeNode(ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword));
     const source = this.relationInverseSource
     const field = this.field
@@ -296,7 +296,7 @@ export class ManyToOneRelationFieldManagerForDto
     }
     else {
       const fieldChange = this.updateFieldInternal(fieldName, fieldType, decoratorManagers, field, source); 
-      if (this.modelName !== this.field.relationModelSingularName) {
+      if (this.modelName !== this.field.relationCoModelSingularName) {
         const currentModelName = this.modelName;
         const currentModuleName = this.moduleName;
         fieldChange.changes.push(this.inverseFieldImport(currentModelName, currentModuleName, source));
@@ -332,13 +332,13 @@ export class ManyToOneRelationFieldManagerForDto
   }
 
   removeAdditionalInverseIdsField(): FieldChange {
-    const fieldName = `${this.field.relationModelFieldName ?? this.modelName}Ids`;
+    const fieldName = `${this.field.relationCoModelFieldName ?? this.modelName}Ids`;
     const source = this.relationInverseSource;
     return this.removeFieldFor(fieldName, source);
   }
 
   removeAdditionalInverseCommandsField(): FieldChange {
-    const fieldName = `${this.field.relationModelFieldName ?? this.modelName}Command`;
+    const fieldName = `${this.field.relationCoModelFieldName ?? this.modelName}Command`;
     const source = this.relationInverseSource;
     return this.removeFieldFor(fieldName, source);
   }
@@ -348,7 +348,7 @@ export class ManyToOneRelationFieldManagerForDto
   }
 
   additionalFieldName(): string {
-    return this.field.relationModelFieldName ?? `${this.modelName}s`;
+    return this.field.relationCoModelFieldName ?? `${this.modelName}s`;
   }
 
   protected isAdditionalFieldRequired(): boolean {

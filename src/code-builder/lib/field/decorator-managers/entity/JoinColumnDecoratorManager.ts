@@ -8,7 +8,7 @@ interface JoinColumnDecoratorOptions {
     source: ts.SourceFile;
     field: any;
     fieldName: string;
-    relationModelFieldName?: string;
+    relationCoModelFieldName?: string;
 }
 
 export class JoinColumnDecoratorManager implements DecoratorManager {
@@ -88,8 +88,8 @@ export class JoinColumnDecoratorManager implements DecoratorManager {
     private buildRelationOptionsCode(): string {
         const options: Record<string, string> = {};
 
-        if (this.options.relationModelFieldName) {
-            options['name'] = `"${this.options.relationModelFieldName}_id"`;
+        if (this.options.relationCoModelFieldName) {
+            options['name'] = `"${this.options.relationCoModelFieldName}_id"`;
             return `{ ${Object.entries(options)
                 .map(([key, value]) => `${key}: ${value}`)
                 .join(', ')} }`;
@@ -102,11 +102,11 @@ export class JoinColumnDecoratorManager implements DecoratorManager {
 
         const newOptions: ts.ObjectLiteralElementLike[] = [];
 
-        if (this.options.relationModelFieldName) {
+        if (this.options.relationCoModelFieldName) {
             newOptions.push(
                 ts.factory.createPropertyAssignment(
                     'name',
-                    ts.factory.createStringLiteral(`${this.options.relationModelFieldName}_id`)
+                    ts.factory.createStringLiteral(`${this.options.relationCoModelFieldName}_id`)
                 )
             );
         }

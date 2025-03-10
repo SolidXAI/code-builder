@@ -282,7 +282,7 @@ export class ManagerForDtoOptions {
     public sourceType: DtoSourceType,
   ) {}
 }
-// insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath);
+// insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath);
 export function safeInsertImport(source: ts.SourceFile, symbolName: string, importFileName: string, currentModuleName: string ): Change {
   // Check if in current source, there exists a class with the same symbolName
   if (importFileName.startsWith(`src/${SOLID_CORE_MODULE_NAME }`)) {
