@@ -28,6 +28,7 @@ import { JoinTableDecoratorManager } from '../../decorator-managers/entity/JoinT
 import { RelationType } from "../../FieldManager";
 import { UniqueIndexDecoratorManager } from '../../decorator-managers/entity/UniqueIndexDecoratorManager';
 import { JoinColumnDecoratorManager } from '../../decorator-managers/entity/JoinColumnDecoratorManager';
+import { OneToManyDecoratorManager } from '../../decorator-managers/entity/OneToManyDecoratorManager';
 
 export abstract class BaseFieldManagerForEntity implements FieldManager {
   source: SourceFile;
@@ -38,6 +39,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   manyToManyDecoratorManager: DecoratorManager;
   joinTableDecoratorManager: DecoratorManager;
   uniqueIndexDecoratorManager: UniqueIndexDecoratorManager;
+  oneToManyDecoratorManager: OneToManyDecoratorManager;
   constructor(
     tree: Tree,
     protected readonly moduleName: string,
@@ -89,7 +91,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     console.log('this.field.columnName', this.field);
     this.joinColumnDecoratorManager = new JoinColumnDecoratorManager(
       {
-        isManyToOneRelationOwner: this.field.relationType === RelationType.ManyToOne,
+        isManyToOneRelationOwner: this.isManyToOne(),
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
@@ -102,7 +104,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         relationModelName: this.field.relationCoModelSingularName,
         relationInverseFieldName: this.field.relationCoModelFieldName,
         relationCascade: this.field.relationCascade,
-        owner: true,
+        owner: this.field.isRelationManyToManyOwner,
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
@@ -111,7 +113,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     );
     this.joinTableDecoratorManager = new JoinTableDecoratorManager(
       {
-        isManyToManyRelationOwner: this.field.relationType === RelationType.ManyToMany,
+        isManyToManyRelationOwner: this.isManyToMany() && this.field.isRelationManyToManyOwner,
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
@@ -125,6 +127,17 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field },
       this.getClassNode(this.modelName, this.source)
     );
+    this.oneToManyDecoratorManager = new OneToManyDecoratorManager(
+      {
+        isOneToMany: this.isOneToMany(),
+        relationCascade: this.field.relationCascade,
+        source: this.source,
+        field: this.field,
+        fieldName: this.fieldName(),
+        modelName: this.modelName,
+      },
+    );
+
   }
 
   protected addFieldInternal(fieldName: string, fieldType: string, decoratorManagers: DecoratorManager[], field: any, modelName: any, source: ts.SourceFile): FieldChange {
@@ -453,6 +466,9 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     return (this.field.type === 'relation' && this.field.relationType === RelationType.ManyToOne);
   }
 
+  private isOneToMany(): boolean {
+    return (this.field.type === 'relation' && this.field.relationType === RelationType.OneToMany);
+  }
 
 
   protected isAdditionalFieldRequired(): boolean {

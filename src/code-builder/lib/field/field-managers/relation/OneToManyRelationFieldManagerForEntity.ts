@@ -6,29 +6,13 @@ import {
   BaseFieldManagerForEntity,
 } from '../base/BaseFieldManagerForEntity';
 
-export class ManyToOneRelationFieldManagerForEntity
+export class OneToManyRelationFieldManagerForEntity
   extends BaseFieldManagerForEntity
   implements FieldManager {
 
-  fieldType(): FieldType {
-    return this.manyToOneFieldType();
-  }
-
-  private manyToOneFieldType(): FieldType {
-    return {
-      text: classify(this.field.relationCoModelSingularName),
-      node: (field: any) => ts.factory.createTypeReferenceNode(
-        ts.factory.createIdentifier(
-          classify(field.relationCoModelSingularName)
-        ),
-        undefined
-      ),
-    };
-  }
-
   override addField(): FieldChange[] {
     const fieldChanges = super.addField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) { 
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) { 
       const mainField = fieldChanges[0]; // The 1st field change is the main field change, related to the entity source file
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -37,7 +21,7 @@ export class ManyToOneRelationFieldManagerForEntity
 
   override updateField(): FieldChange[] {
     const fieldChanges = super.updateField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) { 
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) { 
       const mainField = fieldChanges[0]; // The 1st field change is the main field change, related to the entity source file
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -45,10 +29,23 @@ export class ManyToOneRelationFieldManagerForEntity
   }
 
   relatedFieldImport(): Change {
-    const relatedEntityImportName = `${dasherize(this.field.relationCoModelSingularName)}.entity`;
+    const relatedEntityImportName = `${dasherize(this.field.relationModelSingularName)}.entity`;
     const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-    return safeInsertImport(this.source, classify(this.field.relationCoModelSingularName), relatedEntityPath, this.moduleName);
+    return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath, this.moduleName);
   }
 
-  
+
+  fieldType(): FieldType { // The inverse field type will remain the same for both one-to-many and many-to-many relations
+    const type = `${classify(this.field.relationModelSingularName)}`
+    const text = `${type}[]`
+    return {
+      text: text,
+      node: (_field: any) =>
+        ts.factory.createArrayTypeNode(ts.factory.createTypeReferenceNode(
+          ts.factory.createIdentifier(type),
+          undefined
+        )),
+    };
+  }
+
 }

@@ -69,19 +69,18 @@ export class UniqueIndexDecoratorManager {
         //Since the order matters i.e decorators should appear above the export keyword
         const newModifierLikes = [...newDecorators, ...existingModifiers];
 
-        // If field node is provided, replace the class members with the updated field node
-        const newMembers = this.classNode.members.filter((member) => {
+        // Replace the class memeber matching the field name with the updated field node
+        const newMembers = this.classNode.members.map((member) => {
             // Check if the member is a PropertyDeclaration
             if (ts.isPropertyDeclaration(member)) {
                 // Compare the name of the property with the field name
                 const memberName = member.name.getText();
-                return memberName !== this.options.fieldName; // Exclude members with the matching field name
+                if (memberName === this.options.fieldName) {
+                    return this.fieldNode!;
+                }
             }
-            return true; // Keep non-PropertyDeclaration members
+            return member;
         });
-        if (this.fieldNode) {
-            newMembers.push(this.fieldNode);
-        }
 
         // Update the class node with the new modifiers
         const updatedClass = ts.factory.updateClassDeclaration(
@@ -197,8 +196,8 @@ export class UniqueIndexDecoratorManager {
             const fieldNames = fields.elements.map(e => e.getText().replace(/^["']|["']$/g, ""));
             // Check if fieldNames only contains the field name and deletedTracker
             indexAlreadyPresent = fieldNames.includes(fieldName) && fieldNames.includes('deletedTracker') && fieldNames.length === 2;
-            console.log('fieldNames', fieldNames);
-            console
+            // console.log('fieldNames', fieldNames);
+            // console
         }
         if (!indexAlreadyPresent) return false;
 

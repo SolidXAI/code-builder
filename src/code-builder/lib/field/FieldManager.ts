@@ -20,6 +20,8 @@ import { RichTextFieldHandler } from './field-managers/rich-text/RichTextFieldHa
 import { ShortTextFieldHandler } from './field-managers/short-text/ShortTextFieldHandler';
 import { UUIDFieldHandler } from './field-managers/uuid/UUIDFieldHandler';
 import { SOLID_CORE_MODULE_NAME, SOLID_CORE_MODULE_NPM_PACKAGE_NAME } from '../model/helpers';
+import { OneToManyRelationFieldHandler } from './field-managers/relation/OneToManyRelationFieldHandler';
+import { ManyToManyInverseRelationFieldHandler } from './field-managers/relation/ManyToManyInverseRelationFieldHandler';
 
 export const MAX_EMAIL_LENGTH = 254;
 export const UUID_REGEX = `^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
@@ -212,13 +214,23 @@ export function getFieldHandler(
     case SolidFieldType.datetime:
     case SolidFieldType.time:
       return new DateFieldHandler(tree, moduleName, modelName, field);
-    case SolidFieldType.relation:
-      if (field.relationType === RelationType.ManyToMany) {
-        return new ManyToManyRelationFieldHandler(tree, moduleName, modelName, field);
-      }
-      else {
+    case SolidFieldType.relation: {
+      if (field.relationType === RelationType.ManyToOne) {
         return new ManyToOneRelationFieldHandler(tree, moduleName, modelName, field);
       }
+      else if (field.relationType === RelationType.OneToMany) {
+        return new OneToManyRelationFieldHandler(tree, moduleName, modelName, field);
+      }
+      else if (field.relationType === RelationType.ManyToMany) {
+        if (field.isRelationManyToManyOwner) {
+          return new ManyToManyRelationFieldHandler(tree, moduleName, modelName, field);
+        }
+        else {
+          return new ManyToManyInverseRelationFieldHandler(tree, moduleName, modelName, field);
+        }
+      }
+      return new NoOpsFieldHandler(tree, moduleName, modelName, field);
+    }
     case SolidFieldType.mediaSingle:
     case SolidFieldType.mediaMultiple:
       return new NoOpsFieldHandler(tree, moduleName, modelName, field);
@@ -269,7 +281,8 @@ export function getClassExportKeywordNode (className: string, sourceFile: ts.Sou
 
 export enum RelationType {
   ManyToOne = 'many-to-one',
-  ManyToMany = 'many-to-many'
+  ManyToMany = 'many-to-many',
+  OneToMany = "one-to-many"
 }
 
 export enum DtoSourceType {
