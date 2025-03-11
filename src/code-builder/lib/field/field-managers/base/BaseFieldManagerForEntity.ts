@@ -52,7 +52,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       tree,
       `src/${dasherize(moduleName)}/entities/${dasherize(modelName)}.entity.ts`,
     );
-    console.log('this.field.columnName', this.field);
     const fieldPropertyDeclarationNode = this.getFieldIdentifierNode(
       this.fieldName(),
       this.source
@@ -88,14 +87,13 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       },
       fieldPropertyDeclarationNode,
     );
-    console.log('this.field.columnName', this.field);
     this.joinColumnDecoratorManager = new JoinColumnDecoratorManager(
       {
         isManyToOneRelationOwner: this.isManyToOne(),
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
-        relationCoModelFieldName: this.field.columnName
+        relationCoModelColumnName: this.field.relationCoModelColumnName
       },
     );
     this.manyToManyDecoratorManager = new ManyToManyDecoratorManager(
@@ -119,8 +117,8 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         fieldName: this.fieldName(),
         modelName: this.modelName,
         relationJoinTableName: this.field.relationJoinTableName,
-        relationJoinColumnName: this.field.relationJoinColumnName,
-        joinColumnName: this. field.joinColumnName
+        relationJoinColumnName: this.field.relationCoModelColumnName,
+        joinColumnName: this.field.columnName
       },
     );
     this.uniqueIndexDecoratorManager = new UniqueIndexDecoratorManager(
