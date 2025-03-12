@@ -45,6 +45,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     protected readonly moduleName: string,
     protected readonly modelName: string,
     protected readonly field: any,
+    protected readonly modelEnableSoftDelete?: any
   ) {
     // TODO: Note that the source file instance is created during construction
     // So every operation should use a new instance of the field manager, so updated tree/source is used before each operation
@@ -58,7 +59,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     )?.parent as PropertyDeclaration | undefined;
 
     this.indexDecoratorManager = new IndexDecoratorManager(
-      { index: this.field.index, source: this.source, field: this.field },
+      { index: this.field.index, source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete },
       fieldPropertyDeclarationNode,
     );
     this.columnDecoratorManager = new ColumnDecoratorManager(
@@ -122,7 +123,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       },
     );
     this.uniqueIndexDecoratorManager = new UniqueIndexDecoratorManager(
-      { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field },
+      { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete},
       this.getClassNode(this.modelName, this.source)
     );
     this.oneToManyDecoratorManager = new OneToManyDecoratorManager(

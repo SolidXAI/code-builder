@@ -260,6 +260,7 @@ export function addField(tree: Tree, options: any, field: any) {
       options.module,
       options.model,
       field,
+      options.modelEnableSoftDelete
     );
     const entityFieldChanges = fieldHandler.addEntityField();
     applyFieldChanges(tree, options.module, entityFieldChanges, options?.generateChecksum)
@@ -279,6 +280,7 @@ export function removeField(tree: Tree, options: any, field: any) {
       options.module,
       options.model,
       field,
+      options.modelEnableSoftDelete
     );
 
     const entityFieldChanges = fieldHandler.removeEntityField();
@@ -299,6 +301,7 @@ export function updateField(tree: Tree, options: any, field: any) {
       options.module,
       options.model,
       field,
+      options.modelEnableSoftDelete
     );
     const entityFieldChanges = fieldHandler.updateEntityField();
     // console.log('entityFieldChanges:', entityFieldChanges.map((change) => change.changes));

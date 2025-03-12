@@ -20,6 +20,10 @@
       "type": "string",
       "description": "The data source name of the model"
     },
+    "modelEnableSoftDelete": {
+      "type": "string",
+      "description": "This will indicate model has soft delete enabled"
+    },
     "fields": {
       "oneOf": [
         {

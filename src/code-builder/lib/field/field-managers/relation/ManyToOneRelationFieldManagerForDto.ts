@@ -4,6 +4,7 @@ import { OptionalDecoratorManager } from '../../decorator-managers/dto/OptionalD
 import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecoratorManager';
 import { FieldChange, FieldManager, FieldType, ManagerForDtoOptions } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
+import { ApiPropertyDecoratorManager } from '../../decorator-managers/dto/ApiPropertyDecoratorManager';
 
 export class ManyToOneRelationFieldManagerForDto
   extends BaseFieldManagerForDto
@@ -79,6 +80,7 @@ export class ManyToOneRelationFieldManagerForDto
     const decoratorManagers = [
       new StringDecoratorManager({ isString: true, source: source, field: field }),
       new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
+      new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
     ];
 
     const fieldChange = this.addFieldInternal(fieldName, fieldType, decoratorManagers, field, modelName, source);
@@ -103,6 +105,7 @@ export class ManyToOneRelationFieldManagerForDto
         const decoratorManagers = [
             new StringDecoratorManager({ isString: true, source: source, field: field }),
             new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
+            new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
             // TODO pending @IsEnum(RelationFieldsCommand) 
         ]
  

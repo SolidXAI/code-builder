@@ -182,51 +182,51 @@ export function getFieldHandler(
   moduleName: string,
   modelName: string,
   field: any,
+  modelEnableSoftDelete: any,
 ): FieldHandler {
-  // console.log('field', field);
   switch (field.type) {
     case SolidFieldType.shortText:
     case SolidFieldType.selectionStatic:
     case SolidFieldType.selectionDynamic:
       if (field.selectionValueType === "int") {
-        return new IntFieldHandler(tree, moduleName, modelName, field);
+        return new IntFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
       }
-      return new ShortTextFieldHandler(tree, moduleName, modelName, field);
+      return new ShortTextFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.longtext:
-      return new LongTextFieldHandler(tree, moduleName, modelName, field);
+      return new LongTextFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.richText:
-      return new RichTextFieldHandler(tree, moduleName, modelName, field);
+      return new RichTextFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.json:
-      return new JsonFieldHandler(tree, moduleName, modelName, field);
+      return new JsonFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.int:
-      return new IntFieldHandler(tree, moduleName, modelName, field);
+      return new IntFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.decimal:
-      return new DecimalFieldHandler(tree, moduleName, modelName, field);
+      return new DecimalFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.bigint:
-      return new BigIntFieldHandler(tree, moduleName, modelName, field);  
+      return new BigIntFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);  
     case SolidFieldType.boolean:
-      return new BooleanFieldHandler(tree, moduleName, modelName, field);
+      return new BooleanFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.email:
-      return new EmailFieldHandler(tree, moduleName, modelName, field);
+      return new EmailFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.password:
-      return new PasswordFieldHandler(tree, moduleName, modelName, field);
+      return new PasswordFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.date:
     case SolidFieldType.datetime:
     case SolidFieldType.time:
-      return new DateFieldHandler(tree, moduleName, modelName, field);
+      return new DateFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.relation: {
       if (field.relationType === RelationType.ManyToOne) {
-        return new ManyToOneRelationFieldHandler(tree, moduleName, modelName, field);
+        return new ManyToOneRelationFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
       }
       else if (field.relationType === RelationType.OneToMany) {
-        return new OneToManyRelationFieldHandler(tree, moduleName, modelName, field);
+        return new OneToManyRelationFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
       }
       else if (field.relationType === RelationType.ManyToMany) {
         if (field.isRelationManyToManyOwner) {
-          return new ManyToManyRelationFieldHandler(tree, moduleName, modelName, field);
+          return new ManyToManyRelationFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
         }
         else {
-          return new ManyToManyInverseRelationFieldHandler(tree, moduleName, modelName, field);
+          return new ManyToManyInverseRelationFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
         }
       }
       return new NoOpsFieldHandler(tree, moduleName, modelName, field);
@@ -235,9 +235,9 @@ export function getFieldHandler(
     case SolidFieldType.mediaMultiple:
       return new NoOpsFieldHandler(tree, moduleName, modelName, field);
     case SolidFieldType.uuid:
-      return new UUIDFieldHandler(tree, moduleName, modelName, field);
+      return new UUIDFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.computed:
-      return new ComputedFieldHandler(tree, moduleName, modelName, field);
+      return new ComputedFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     default:
       console.log(`Field ${field.name} of type ${field.type} not supported yet`);
       return new NoOpsFieldHandler(tree, moduleName, modelName, field);

@@ -7,13 +7,13 @@ interface IndexDecoratorOptions {
     index: boolean;
     source: ts.SourceFile;
     field: any;
+    modelEnableSoftDelete?: any
 }
 
 export class IndexDecoratorManager implements DecoratorManager {
-
     constructor(public options: IndexDecoratorOptions, public fieldNode?: PropertyDeclaration) { }
     isApplyDecorator(): boolean {
-        return this.options.index && this.options.field.relationType !== RelationType.ManyToMany && this.options.field.relationType !== RelationType.OneToMany;
+        return (this.options.index || (!this.options.modelEnableSoftDelete && this.options.field.unique)) && this.options.field.relationType !== RelationType.ManyToMany && this.options.field.relationType !== RelationType.OneToMany;
     }
     decoratorName(): string {
         return 'Index';
@@ -25,7 +25,8 @@ export class IndexDecoratorManager implements DecoratorManager {
         const fieldSourceLines = [];
         const changes: Change[] = [];
         // if (this.field.index) {
-        const indexDecoratorLine = `@Index()`;
+        const indexOptions = this.buildColumnOptionsCode();
+        const indexDecoratorLine = indexOptions ? `@Index(${indexOptions})` : `@Index()`;
         fieldSourceLines.push(indexDecoratorLine);
         changes.push(...this.decoratorImports());
         // }
@@ -78,11 +79,23 @@ export class IndexDecoratorManager implements DecoratorManager {
     }
 
     private createIndexDecorator(): ts.ModifierLike {
+        const indexArguments: ts.Expression[] = [];
+        if ((this.options.modelEnableSoftDelete === undefined || this.options.modelEnableSoftDelete === false) 
+            && this.options.field.unique) {
+            indexArguments.push(
+                ts.factory.createObjectLiteralExpression([
+                    ts.factory.createPropertyAssignment(
+                        'unique',
+                        ts.factory.createTrue()
+                    )
+                ])
+            );
+        }
         return ts.factory.createDecorator(
             ts.factory.createCallExpression(
                 ts.factory.createIdentifier('Index'),
                 undefined,
-                [],
+                indexArguments
             ),
         );
     }
@@ -101,5 +114,36 @@ export class IndexDecoratorManager implements DecoratorManager {
         return identifier.text === identifierName;
     }
 
+    private buildColumnDecoratorOptions(): Map<string, any> { 
+        const options: Map<string, any> = new Map<string, any>();
+    
+        if ((this.options.modelEnableSoftDelete === undefined || this.options.modelEnableSoftDelete === false) 
+            && this.options.field.unique) {
+            options.set('unique', true);
+        }
+    
+        return options;
+    }
 
+    private buildColumnOptionsCode(): string {
+        const options = this.buildColumnDecoratorOptions();
+        const keys = Array.from(options.keys());
+    
+        if (keys.length === 0) {
+            return '';
+        }
+    
+        const optionsString = keys
+            .filter((key) => options.get(key) !== null)
+            .map((key) => {
+                if (typeof options.get(key) === 'string') {
+                    return `${key}: "${options.get(key)}"`;
+                } else {
+                    return `${key}: ${options.get(key)}`;
+                }
+            })
+            .join(', ');
+    
+        return `{ ${optionsString} }`;
+    }
 }

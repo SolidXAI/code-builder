@@ -8,6 +8,7 @@ import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecor
 import { TransformDecoratorManager } from '../../decorator-managers/dto/TransformDecoratorManager';
 import { DecoratorType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, safeInsertImport } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
+import { ApiPropertyDecoratorManager } from '../../decorator-managers/dto/ApiPropertyDecoratorManager';
 
 export class ManyToManyRelationFieldManagerForDto
     extends BaseFieldManagerForDto
@@ -106,7 +107,8 @@ export class ManyToManyRelationFieldManagerForDto
         const modelName = this.modelName        
         const decoratorManagers = [
             new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
-            new ArrayDecoratorManager({ isArray: true, source: source, field: field })
+            new ArrayDecoratorManager({ isArray: true, source: source, field: field }),
+            new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
         ]
 
         return this.addFieldInternal(fieldName, fieldType, decoratorManagers, field, modelName, source);
@@ -121,6 +123,7 @@ export class ManyToManyRelationFieldManagerForDto
         const decoratorManagers = [
             new StringDecoratorManager({ isString: true, source: source, field: field }),
             new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
+            new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
             // TODO pending @IsEnum(RelationFieldsCommand) 
         ]
 
@@ -176,7 +179,8 @@ export class ManyToManyRelationFieldManagerForDto
             const fieldType = ts.factory.createArrayTypeNode(ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword));
             const decoratorManagers = [
                 new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
-                new ArrayDecoratorManager({ isArray: true, source: source, field: field })
+                new ArrayDecoratorManager({ isArray: true, source: source, field: field }),
+                new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
             ];
             return this.updateFieldInternal(idsFieldName, fieldType, decoratorManagers, field, source);
         }
@@ -203,6 +207,7 @@ export class ManyToManyRelationFieldManagerForDto
             const decoratorManagers = [
                 new StringDecoratorManager({ isString: true, source: source, field: field }),
                 new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
+                new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
                 // TODO pending @IsEnum(RelationFieldsCommand) 
             ];
             return this.updateFieldInternal(commandFieldName, fieldType, decoratorManagers, field, source);
