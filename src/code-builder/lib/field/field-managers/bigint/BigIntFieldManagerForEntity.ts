@@ -9,8 +9,8 @@ export class BigIntFieldManagerForEntity
 {
   source: ts.SourceFile;
 
-  constructor(tree: Tree, moduleName: string, modelName: string, field: any) {
-    super(tree, moduleName, modelName, field);
+  constructor(tree: Tree, moduleName: string, modelName: string, field: any, modelEnableSoftDelete: any) {
+    super(tree, moduleName, modelName, field, modelEnableSoftDelete);
   }
 
   fieldType(): FieldType {

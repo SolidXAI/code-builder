@@ -12,12 +12,14 @@ export class RichTextFieldHandler implements FieldHandler {
     moduleName: string,
     modelName: string,
     field: string,
+    modelEnableSoftDelete: any
   ) {
     this.entityFieldManager = new RichTextFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
+      modelEnableSoftDelete
     );
     this.createDtoFieldManager = new RichTextFieldManagerForDto(
       tree,

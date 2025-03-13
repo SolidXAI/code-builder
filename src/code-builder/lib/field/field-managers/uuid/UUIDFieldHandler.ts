@@ -13,12 +13,14 @@ export class UUIDFieldHandler implements FieldHandler {
     moduleName: string,
     modelName: string,
     field: string,
+    modelEnableSoftDelete: any
   ) {
     this.entityFieldManager = new UUIDFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
+      modelEnableSoftDelete
     );
     this.createDtoFieldManager = new UUIDFieldManagerForDto(
       tree,

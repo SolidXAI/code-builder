@@ -13,12 +13,14 @@ export class EmailFieldHandler implements FieldHandler {
     moduleName: string,
     modelName: string,
     field: string,
+    modelEnableSoftDelete: any
   ) {
     this.entityFieldManager = new EmailFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
+      modelEnableSoftDelete
     );
     this.createDtoFieldManager = new EmailFieldManagerForDto(
       tree,

@@ -13,12 +13,14 @@ export class JsonFieldHandler implements FieldHandler {
     moduleName: string,
     modelName: string,
     field: string,
+    modelEnableSoftDelete: any
   ) {
     this.entityFieldManager = new JsonFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
+      modelEnableSoftDelete
     );
     this.createDtoFieldManager = new JsonFieldManagerForDto(
       tree,

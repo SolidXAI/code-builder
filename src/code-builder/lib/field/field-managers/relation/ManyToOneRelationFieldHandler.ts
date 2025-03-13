@@ -7,12 +7,13 @@ export class ManyToOneRelationFieldHandler implements FieldHandler {
   entityFieldManager: FieldManager;
   createDtoFieldManager: FieldManager;
   updateDtoFieldManager: FieldManager;
-  constructor(tree: any, moduleName: string, modelName: string, field: any) {
+  constructor(tree: any, moduleName: string, modelName: string, field: any, modelEnableSoftDelete: any) {
     this.entityFieldManager = new ManyToOneRelationFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
+      modelEnableSoftDelete
     );
     this.createDtoFieldManager = new ManyToOneRelationFieldManagerForDto(
       tree,

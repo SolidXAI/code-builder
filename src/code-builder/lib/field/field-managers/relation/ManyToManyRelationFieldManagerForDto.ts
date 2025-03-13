@@ -8,6 +8,7 @@ import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecor
 import { TransformDecoratorManager } from '../../decorator-managers/dto/TransformDecoratorManager';
 import { DecoratorType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, safeInsertImport } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
+import { ApiPropertyDecoratorManager } from '../../decorator-managers/dto/ApiPropertyDecoratorManager';
 
 export class ManyToManyRelationFieldManagerForDto
     extends BaseFieldManagerForDto
@@ -28,7 +29,7 @@ export class ManyToManyRelationFieldManagerForDto
             DecoratorType.ValidateNested,
         )];
         this.decoratorManagers.push(
-            new TransformDecoratorManager({ isTransform: true, type: this.transformType(this.field.relationModelSingularName), source: this.source, field: field })
+            new TransformDecoratorManager({ isTransform: true, type: this.transformType(this.field.relationCoModelSingularName), source: this.source, field: field })
         );
         
     }
@@ -66,7 +67,7 @@ export class ManyToManyRelationFieldManagerForDto
 
     // This is the field type of the owner in the m2m relation
     fieldType(): FieldType {
-        return this.manyToManyFieldType(this.field.relationModelSingularName)
+        return this.manyToManyFieldType(this.field.relationCoModelSingularName)
     }
 
     private transformType(forModelName: string): string {
@@ -106,7 +107,8 @@ export class ManyToManyRelationFieldManagerForDto
         const modelName = this.modelName        
         const decoratorManagers = [
             new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
-            new ArrayDecoratorManager({ isArray: true, source: source, field: field })
+            new ArrayDecoratorManager({ isArray: true, source: source, field: field }),
+            new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
         ]
 
         return this.addFieldInternal(fieldName, fieldType, decoratorManagers, field, modelName, source);
@@ -121,6 +123,7 @@ export class ManyToManyRelationFieldManagerForDto
         const decoratorManagers = [
             new StringDecoratorManager({ isString: true, source: source, field: field }),
             new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
+            new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
             // TODO pending @IsEnum(RelationFieldsCommand) 
         ]
 
@@ -176,7 +179,8 @@ export class ManyToManyRelationFieldManagerForDto
             const fieldType = ts.factory.createArrayTypeNode(ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword));
             const decoratorManagers = [
                 new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
-                new ArrayDecoratorManager({ isArray: true, source: source, field: field })
+                new ArrayDecoratorManager({ isArray: true, source: source, field: field }),
+                new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
             ];
             return this.updateFieldInternal(idsFieldName, fieldType, decoratorManagers, field, source);
         }
@@ -203,6 +207,7 @@ export class ManyToManyRelationFieldManagerForDto
             const decoratorManagers = [
                 new StringDecoratorManager({ isString: true, source: source, field: field }),
                 new OptionalDecoratorManager({ isApplyOptional: true, optional: true, source: source, field: field }),
+                new ApiPropertyDecoratorManager({isApplyApiProperty: true, source: source, field: field})
                 // TODO pending @IsEnum(RelationFieldsCommand) 
             ];
             return this.updateFieldInternal(commandFieldName, fieldType, decoratorManagers, field, source);
@@ -242,7 +247,7 @@ export class ManyToManyRelationFieldManagerForDto
 
     override addField(): FieldChange[] {
         const fieldChanges: FieldChange[] = super.addField();
-        if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) {
+        if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) {
             const mainField = fieldChanges[0];
             mainField.changes.push(this.relatedFieldImport());
         }
@@ -257,7 +262,7 @@ export class ManyToManyRelationFieldManagerForDto
         // if (containsAddFieldChanges) return fieldChanges;
 
         //This line is required to add import changes in the update context
-        // if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) {
+        // if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) {
             const mainField = fieldChanges[0];
             mainField.changes.push(this.relatedFieldImport());
         // }
@@ -265,9 +270,9 @@ export class ManyToManyRelationFieldManagerForDto
     }
 
     relatedFieldImport(): Change {
-        const relatedEntityImportName = `update-${dasherize(this.field.relationModelSingularName)}.dto`;
+        const relatedEntityImportName = `update-${dasherize(this.field.relationCoModelSingularName)}.dto`;
         const relatedEntityPath = this.field.relationModelModuleName ? `src/${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-        return safeInsertImport(this.source, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
-        // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath);
+        return safeInsertImport(this.source, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
+        // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath);
     } //Uncomment this method while implementing many-to-many relation changes
 }

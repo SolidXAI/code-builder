@@ -13,12 +13,14 @@ export class ShortTextFieldHandler implements FieldHandler {
     moduleName: string,
     modelName: string,
     field: string,
+    modelEnableSoftDelete: any
   ) {
     this.entityFieldManager = new ShortTextFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
+      modelEnableSoftDelete
     );
     this.createDtoFieldManager = new ShortTextFieldManagerForDto(
       tree,
