@@ -132,7 +132,6 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
             }
         }
         // Create the new relation decorator options
-        console.log('ABCD', this.options);
         const decoratorOptions = this.createRelationDecoratorOptions();
         const newPropertyAssignments: ObjectLiteralElementLike[] = Array.from(decoratorOptions.values()).filter(p => p !== null) as ts.PropertyAssignment[];
         // console.log('newPropertyAssignments', newPropertyAssignments.map(p => JSON.stringify(p.name)).join(', '));

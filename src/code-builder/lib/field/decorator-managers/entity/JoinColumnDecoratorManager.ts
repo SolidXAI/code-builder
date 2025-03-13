@@ -89,7 +89,7 @@ export class JoinColumnDecoratorManager implements DecoratorManager {
         const options: Record<string, string> = {};
 
         if (this.options.relationCoModelColumnName) {
-            options['name'] = `"${this.options.relationCoModelColumnName}_id"`;
+            options['name'] = `"${this.options.relationCoModelColumnName}"`;
             return `{ ${Object.entries(options)
                 .map(([key, value]) => `${key}: ${value}`)
                 .join(', ')} }`;
@@ -106,7 +106,7 @@ export class JoinColumnDecoratorManager implements DecoratorManager {
             newOptions.push(
                 ts.factory.createPropertyAssignment(
                     'name',
-                    ts.factory.createStringLiteral(`${this.options.relationCoModelColumnName}_id`)
+                    ts.factory.createStringLiteral(`${this.options.relationCoModelColumnName}`)
                 )
             );
         }
