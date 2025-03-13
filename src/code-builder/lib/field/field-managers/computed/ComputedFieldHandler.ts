@@ -11,12 +11,14 @@ export class ComputedFieldHandler implements FieldHandler {
     moduleName: string,
     modelName: string,
     field: string,
+    modelEnableSoftDelete: any
   ) {
     this.entityFieldManager = new ComputedFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
+      modelEnableSoftDelete,
     );
     //Instantiate the entity and dto source files
   }

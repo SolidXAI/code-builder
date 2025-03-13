@@ -16,6 +16,10 @@
       "type": "string",
       "description": "The display name for the module of the model"
     },
+    "modelEnableSoftDelete": {
+      "type": "string",
+      "description": "This will indicate model has soft delete enabled"
+    },
     "fields": {
       "oneOf": [
         {

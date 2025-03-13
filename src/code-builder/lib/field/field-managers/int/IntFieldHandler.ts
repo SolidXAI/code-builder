@@ -7,12 +7,13 @@ export class IntFieldHandler implements FieldHandler {
   createDtoFieldManager: FieldManager;
   updateDtoFieldManager: FieldManager;
 
-  constructor(tree: any, moduleName: string, modelName: string, field: any) {
+  constructor(tree: any, moduleName: string, modelName: string, field: any, modelEnableSoftDelete: any) {
     this.entityFieldManager = new IntFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
+      modelEnableSoftDelete
     );
     this.createDtoFieldManager = new IntFieldManagerForDto(
       tree,

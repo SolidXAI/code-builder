@@ -16,10 +16,10 @@ export class ManyToOneRelationFieldManagerForEntity
 
   private manyToOneFieldType(): FieldType {
     return {
-      text: classify(this.field.relationModelSingularName),
+      text: classify(this.field.relationCoModelSingularName),
       node: (field: any) => ts.factory.createTypeReferenceNode(
         ts.factory.createIdentifier(
-          classify(field.relationModelSingularName)
+          classify(field.relationCoModelSingularName)
         ),
         undefined
       ),
@@ -28,7 +28,7 @@ export class ManyToOneRelationFieldManagerForEntity
 
   override addField(): FieldChange[] {
     const fieldChanges = super.addField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) { 
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) { 
       const mainField = fieldChanges[0]; // The 1st field change is the main field change, related to the entity source file
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -37,7 +37,7 @@ export class ManyToOneRelationFieldManagerForEntity
 
   override updateField(): FieldChange[] {
     const fieldChanges = super.updateField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) { 
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) { 
       const mainField = fieldChanges[0]; // The 1st field change is the main field change, related to the entity source file
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -45,9 +45,9 @@ export class ManyToOneRelationFieldManagerForEntity
   }
 
   relatedFieldImport(): Change {
-    const relatedEntityImportName = `${dasherize(this.field.relationModelSingularName)}.entity`;
+    const relatedEntityImportName = `${dasherize(this.field.relationCoModelSingularName)}.entity`;
     const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-    return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath, this.moduleName);
+    return safeInsertImport(this.source, classify(this.field.relationCoModelSingularName), relatedEntityPath, this.moduleName);
   }
 
   

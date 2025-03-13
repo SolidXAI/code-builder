@@ -8,12 +8,13 @@ interface UniqueIndexDecoratorOptions {
     fieldName: string;
     source: ts.SourceFile;
     field: any;
+    modelEnableSoftDelete?: any;
 }
 
 export class UniqueIndexDecoratorManager {
     constructor(public options: UniqueIndexDecoratorOptions, public classNode: ClassDeclaration, public fieldNode?: PropertyDeclaration) { }
     isApplyDecorator(): boolean {
-        return this.options.unique;
+        return this.options.unique && this.options.modelEnableSoftDelete;
     }
     decoratorName(): string {
         return 'Index';
@@ -47,6 +48,7 @@ export class UniqueIndexDecoratorManager {
     // @returns the updated property declaration
     updateDecorator(): [ClassDeclaration, Change[]] {
         if (!this.classNode) throw new Error('Class node is required for updating the unique index decorator');
+        if (!this.fieldNode) throw new Error('Field node is required for updating the unique index decorator');
 
         let existingModifierLikes: ts.NodeArray<ModifierLike> | undefined = this.classNode.modifiers;
 

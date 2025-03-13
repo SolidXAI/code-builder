@@ -45,6 +45,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     protected readonly moduleName: string,
     protected readonly modelName: string,
     protected readonly field: any,
+    protected readonly modelEnableSoftDelete?: any
   ) {
     // TODO: Note that the source file instance is created during construction
     // So every operation should use a new instance of the field manager, so updated tree/source is used before each operation
@@ -52,14 +53,13 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       tree,
       `src/${dasherize(moduleName)}/entities/${dasherize(modelName)}.entity.ts`,
     );
-
     const fieldPropertyDeclarationNode = this.getFieldIdentifierNode(
       this.fieldName(),
       this.source
     )?.parent as PropertyDeclaration | undefined;
 
     this.indexDecoratorManager = new IndexDecoratorManager(
-      { index: this.field.index, source: this.source, field: this.field },
+      { index: this.field.index, source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete },
       fieldPropertyDeclarationNode,
     );
     this.columnDecoratorManager = new ColumnDecoratorManager(
@@ -78,7 +78,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     this.manyToOneDecoratorManager = new ManyToOneDecoratorManager(
       {
         isManyToOne: this.isManyToOne(),
-        relationModelSingularName: this.field.relationModelSingularName,
+        relationCoModelSingularName: this.field.relationCoModelSingularName,
         relationCascade: this.field.relationCascade,
         required: this.field.required,
         source: this.source,
@@ -94,14 +94,14 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
-        relationModelFieldName: this.field.relationModelFieldName
+        relationCoModelColumnName: this.field.relationCoModelColumnName
       },
     );
     this.manyToManyDecoratorManager = new ManyToManyDecoratorManager(
       {
         isManyToMany: this.isManyToMany(),
-        relationModelName: this.field.relationModelSingularName,
-        relationInverseFieldName: this.field.relationModelFieldName,
+        relationModelName: this.field.relationCoModelSingularName,
+        relationInverseFieldName: this.field.relationCoModelFieldName,
         relationCascade: this.field.relationCascade,
         owner: this.field.isRelationManyToManyOwner,
         source: this.source,
@@ -118,12 +118,12 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         fieldName: this.fieldName(),
         modelName: this.modelName,
         relationJoinTableName: this.field.relationJoinTableName,
-        relationJoinColumnName: this.field.relationJoinColumnName,
-        joinColumnName: this. field.joinColumnName
+        relationJoinColumnName: this.field.relationCoModelColumnName,
+        joinColumnName: this.field.columnName
       },
     );
     this.uniqueIndexDecoratorManager = new UniqueIndexDecoratorManager(
-      { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field },
+      { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete},
       this.getClassNode(this.modelName, this.source)
     );
     this.oneToManyDecoratorManager = new OneToManyDecoratorManager(
@@ -457,7 +457,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   }
 
   protected inverseRelationFieldName(): string {
-    return `${this.field.relationModelSingularName}s`;
+    return `${this.field.relationCoModelSingularName}s`;
   }
 
 

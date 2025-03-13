@@ -6,7 +6,7 @@ import { DecoratorManager, DeleteType, PartialAddFieldChange } from "../../Field
 import _ from 'lodash';
 interface ManyToOneDecoratorOptions {
     isManyToOne: boolean;
-    relationModelSingularName: string;
+    relationCoModelSingularName: string;
     relationCascade: DeleteType;
     required: boolean;
     source: ts.SourceFile;
@@ -37,7 +37,7 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
         // }
         // Add the relation decorator
         fieldSourceLines.push(
-            `@${this.decoratorName()}(() => ${classify(this.options.relationModelSingularName)}, ${this.buildRelationOptionsCode()})`,
+            `@${this.decoratorName()}(() => ${classify(this.options.relationCoModelSingularName)}, ${this.buildRelationOptionsCode()})`,
         );
         changes.push(...this.decoratorImports());
         return {
@@ -148,7 +148,7 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
             [],
             undefined,
             ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-            ts.factory.createIdentifier(classify(this.options.relationModelSingularName))
+            ts.factory.createIdentifier(classify(this.options.relationCoModelSingularName))
         )
         const decoratorOptionsExpression = ts.factory.createObjectLiteralExpression(newPropertyAssignments);
         const call = ts.factory.createCallExpression(decoratorIdentifier, undefined, [typeFunctionOrTarget, decoratorOptionsExpression]);
