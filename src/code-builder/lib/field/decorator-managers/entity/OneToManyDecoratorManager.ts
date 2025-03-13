@@ -2,7 +2,7 @@ import { camelize, classify } from "@angular-devkit/core/src/utils/strings";
 import ts, { ModifierLike, ObjectLiteralElementLike, PropertyDeclaration } from "@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript";
 import { insertImport } from "@schematics/angular/utility/ast-utils";
 import { Change } from "@schematics/angular/utility/change";
-import { DecoratorManager, DeleteType, PartialAddFieldChange } from "../../FieldManager";
+import { DecoratorManager, PartialAddFieldChange } from "../../FieldManager";
 
 interface OneToManyDecoratorOptions {
     isOneToMany: boolean;
