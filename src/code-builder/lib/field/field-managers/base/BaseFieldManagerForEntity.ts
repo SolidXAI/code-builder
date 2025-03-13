@@ -100,8 +100,8 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     this.manyToManyDecoratorManager = new ManyToManyDecoratorManager(
       {
         isManyToMany: this.isManyToMany(),
-        relationModelName: this.field.relationModelSingularName,
-        relationInverseFieldName: this.field.relationModelFieldName,
+        relationModelName: this.field.relationCoModelSingularName,
+        relationInverseFieldName: this.field.relationCoModelFieldName,
         owner: this.field.isRelationManyToManyOwner,
         source: this.source,
         field: this.field,
