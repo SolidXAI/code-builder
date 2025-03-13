@@ -12,7 +12,7 @@ export class OneToManyRelationFieldManagerForEntity
 
   override addField(): FieldChange[] {
     const fieldChanges = super.addField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) { 
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) { 
       const mainField = fieldChanges[0]; // The 1st field change is the main field change, related to the entity source file
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -21,7 +21,7 @@ export class OneToManyRelationFieldManagerForEntity
 
   override updateField(): FieldChange[] {
     const fieldChanges = super.updateField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) { 
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) { 
       const mainField = fieldChanges[0]; // The 1st field change is the main field change, related to the entity source file
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -29,14 +29,14 @@ export class OneToManyRelationFieldManagerForEntity
   }
 
   relatedFieldImport(): Change {
-    const relatedEntityImportName = `${dasherize(this.field.relationModelSingularName)}.entity`;
+    const relatedEntityImportName = `${dasherize(this.field.relationCoModelSingularName)}.entity`;
     const relatedEntityPath = this.field.relationModelModuleName ? `src/${dasherize(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-    return safeInsertImport(this.source, classify(this.field.relationModelSingularName), relatedEntityPath, this.moduleName);
+    return safeInsertImport(this.source, classify(this.field.relationCoModelSingularName), relatedEntityPath, this.moduleName);
   }
 
 
   fieldType(): FieldType { // The inverse field type will remain the same for both one-to-many and many-to-many relations
-    const type = `${classify(this.field.relationModelSingularName)}`
+    const type = `${classify(this.field.relationCoModelSingularName)}`
     const text = `${type}[]`
     return {
       text: text,

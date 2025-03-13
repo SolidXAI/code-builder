@@ -79,12 +79,12 @@ export class OneToManyRelationFieldManagerForDto
   }
 
   private transformType(): string {
-    return `Update${classify(this.field.relationModelSingularName)}Dto`;
+    return `Update${classify(this.field.relationCoModelSingularName)}Dto`;
   }
 
   override addField(): FieldChange[] {
     const fieldChanges: FieldChange[] = super.addField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) {
+    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) {
       const mainField = fieldChanges[0];
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -143,7 +143,7 @@ export class OneToManyRelationFieldManagerForDto
     // if (containsAddFieldChanges) return fieldChanges;
 
     //This line is required to add import changes in the update context
-    // if (fieldChanges.length > 0 && this.modelName !== this.field.relationModelSingularName) {
+    // if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) {
     const mainField = fieldChanges[0];
     mainField.changes.push(this.relatedFieldImport());
     // }
@@ -243,10 +243,10 @@ export class OneToManyRelationFieldManagerForDto
   }
 
   relatedFieldImport(): Change {
-    const relatedEntityImportName = `update-${dasherize(this.field.relationModelSingularName)}.dto`;
+    const relatedEntityImportName = `update-${dasherize(this.field.relationCoModelSingularName)}.dto`;
     const relatedEntityPath = this.field.relationModelModuleName ? `src/${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
-    return safeInsertImport(this.source, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
-    // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationModelSingularName)}Dto`, relatedEntityPath);
+    return safeInsertImport(this.source, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
+    // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath);
   } //Uncomment this method while implementing many-to-many relation changes
 
 }
