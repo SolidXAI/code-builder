@@ -6,6 +6,8 @@ import { DecoratorManager, PartialAddFieldChange } from "../../FieldManager";
 
 interface OneToManyDecoratorOptions {
     isOneToMany: boolean;
+    relationModelName: string;
+    relationInverseFieldName: string;
     source: ts.SourceFile;
     field: any;
     fieldName: string;
@@ -35,10 +37,16 @@ export class OneToManyDecoratorManager implements DecoratorManager {
         // if (oneToManyImport) {
         //     changes.push(oneToManyImport);
         // }
-        fieldSourceLines.push(
-            `@${this.decoratorName()}(() => ${classify(this.options.modelName)}, ${camelize(this.options.modelName)} => ${camelize(this.options.modelName)}.${this.options.fieldName}, ${this.buildRelationOptionsCode()})`,
-        );
+        // fieldSourceLines.push(
+        //     `@${this.decoratorName()}(() => ${classify(this.options.modelName)}, ${camelize(this.options.modelName)} => ${camelize(this.options.modelName)}.${this.options.fieldName}, ${this.buildRelationOptionsCode()})`,
+        // );
         changes.push(...this.decoratorImports());
+
+        const fieldSourceLineComponents: string[] = [];
+        fieldSourceLineComponents.push(`() => ${classify(this.options.relationModelName)}`);
+        this.options.relationInverseFieldName ? fieldSourceLineComponents.push(`${camelize(this.options.relationModelName)} => ${camelize(this.options.relationModelName)}.${this.options.relationInverseFieldName}`) : "no-ops";
+        fieldSourceLineComponents.push(`${this.buildRelationOptionsCode()}`);
+        fieldSourceLines.push(`@${this.decoratorName()}(${fieldSourceLineComponents.join(', ')})`);
 
         return {
             filePath: this.options.source.fileName,
@@ -129,7 +137,7 @@ export class OneToManyDecoratorManager implements DecoratorManager {
             [],
             undefined,
             ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-            ts.factory.createIdentifier(classify(this.options.modelName))
+            ts.factory.createIdentifier(classify(this.options.relationModelName))
         );
         argumentsArray.push(typeFunctionOrTarget);
         // 2nd Argument: Inverse side
@@ -139,7 +147,7 @@ export class OneToManyDecoratorManager implements DecoratorManager {
             [ts.factory.createParameterDeclaration(
                 undefined,
                 undefined,
-                ts.factory.createIdentifier(camelize(this.options.modelName)),
+                ts.factory.createIdentifier(camelize(this.options.relationModelName)),
                 undefined,
                 undefined,
                 undefined
@@ -147,8 +155,8 @@ export class OneToManyDecoratorManager implements DecoratorManager {
             undefined,
             ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
             ts.factory.createPropertyAccessExpression(
-                ts.factory.createIdentifier(camelize(this.options.modelName)),
-                ts.factory.createIdentifier(this.options.fieldName)
+                ts.factory.createIdentifier(camelize(this.options.relationModelName)),
+                ts.factory.createIdentifier(this.options.relationInverseFieldName)
             )
         );
         argumentsArray.push(inverseSide);

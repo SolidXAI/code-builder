@@ -128,6 +128,8 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     this.oneToManyDecoratorManager = new OneToManyDecoratorManager(
       {
         isOneToMany: this.isOneToMany(),
+        relationModelName: this.field.relationCoModelSingularName,
+        relationInverseFieldName: this.field.relationCoModelFieldName,
         source: this.source,
         field: this.field,
         fieldName: this.fieldName(),
