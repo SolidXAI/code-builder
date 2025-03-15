@@ -515,7 +515,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   }
 
   private decoratorManagers(): DecoratorManager[] {
-    return [this.indexDecoratorManager, this.columnDecoratorManager, this.manyToOneDecoratorManager, this.joinColumnDecoratorManager, this.manyToManyDecoratorManager, this.joinTableDecoratorManager];
+    return [this.indexDecoratorManager, this.columnDecoratorManager, this.manyToOneDecoratorManager, this.joinColumnDecoratorManager, this.manyToManyDecoratorManager, this.joinTableDecoratorManager, this.oneToManyDecoratorManager];
   }
 
   protected addAdditionalField(): FieldChange[] {
