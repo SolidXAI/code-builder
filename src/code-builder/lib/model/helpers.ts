@@ -169,12 +169,46 @@ function safeApplyChanges(
   changes: Change[],
   generateChecksum: boolean=false
 ) {
-  // De-duplicate changes which have the same description
-  const uniqueChanges = changes.filter((item, index, self) =>
-    index === self.findIndex((c) => c.description === item.description)
+  const uniqueChanges = deDuplicateByDescription(changes);
+
+  // Get all the insert changes
+  const insertChanges = uniqueChanges.filter((change) => change instanceof InsertChange);
+ 
+  // Get all the replace and remove changes
+  const replaceAndRemoveChanges = uniqueChanges.filter(
+    (change) => change instanceof ReplaceChangeSSS || change instanceof RemoveChangeSSS
   );
-  applyChanges(tree, filePath, uniqueChanges)
+  const { replaceChangesArray, removeChangesArray } = deDuplicateByPosition(replaceAndRemoveChanges);
+  
+  const safeChanges = [...insertChanges, ...replaceChangesArray, ...removeChangesArray];
+  applyChanges(tree, filePath, safeChanges)
   generateChecksum ? handleUpdateChecksums(tree, moduleName, filePath) : "no-ops";
+}
+
+function deDuplicateByDescription(changes: Change[]) {
+  return changes.filter((item, index, self) => index === self.findIndex((c) => c.description === item.description)
+  );
+}
+
+// if there are multiple replace changes for the same position, then only the last replace change will be applied
+function deDuplicateByPosition(replaceAndRemoveChanges: Change[]) {
+  const replaceChanges = replaceAndRemoveChanges.filter((change) => change instanceof ReplaceChangeSSS);
+  // de-duplicate the replace changes in the same position, using the last replace change
+  const replaceChangesMap = new Map<number, ReplaceChangeSSS>();
+  replaceChanges.forEach((change) => {
+    replaceChangesMap.set(change.replacePosition, change);
+  });
+  const replaceChangesArray = Array.from(replaceChangesMap.values());
+
+  // if there are multiple replace changes for the same position, then only the last replace change will be applied
+  const removeChanges = replaceAndRemoveChanges.filter((change) => change instanceof RemoveChangeSSS);
+  // de-duplicate the remove changes in the same position, using the last remove change
+  const removeChangesMap = new Map<number, RemoveChangeSSS>();
+  removeChanges.forEach((change) => {
+    removeChangesMap.set(change.removePosition, change);
+  });
+  const removeChangesArray = Array.from(removeChangesMap.values());
+  return { replaceChangesArray, removeChangesArray };
 }
 
 export function generateMD5Hash(input: string): string {
@@ -317,7 +351,7 @@ export function updateField(tree: Tree, options: any, field: any) {
 }
 
 function applyFieldChanges(tree: Tree, moduleName: string, fieldChanges: FieldChange[], generateChecksum: boolean=false) {
-    // Collect the changes file wise into a map
+    // Collect the changes file wise into a map, i.e all changes related to a file get applied together
     const changesMap = new Map<string, Change[]>();
     fieldChanges.forEach((fieldChange) => {
       const changes = changesMap.get(fieldChange.filePath) ?? [];
@@ -325,7 +359,7 @@ function applyFieldChanges(tree: Tree, moduleName: string, fieldChanges: FieldCh
       changesMap.set(fieldChange.filePath, changes);
     });
     
-    //Apply the changes to the entity file
+    //Apply the changes to the file
     changesMap.forEach((changes, filePath) => {
       safeApplyChanges(
         tree,
