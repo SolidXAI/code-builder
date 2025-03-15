@@ -1,6 +1,6 @@
 {
   "name": "@solidstarters/solid-code-builder",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "This package is use to generate code for the @solidstarters projects",
   "private": false,
   "publishConfig": {
