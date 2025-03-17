@@ -277,7 +277,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       this.updateFieldType(fieldPropertyDeclarationNode, fieldType);
 
     updatedPropertyDeclarationNode =
-      this.updateFieldInitializer(fieldPropertyDeclarationNode, this.defaultValueInitializer(field.defaultValue)?.expression);
+      this.updateFieldInitializer(updatedPropertyDeclarationNode, this.defaultValueInitializer(field.defaultValue)?.expression);
 
     // Apply the decorator transformations  to the field property declaration node
     const [updatedPropertyDeclarationNodeTransformed, decoratorChanges] = this.applyUpdateDecoratorTransformations(updatedPropertyDeclarationNode, ...decoratorManagers);

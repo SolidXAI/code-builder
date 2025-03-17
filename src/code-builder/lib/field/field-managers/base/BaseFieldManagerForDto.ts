@@ -232,6 +232,9 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     let updatedPropertyDeclarationNode: ts.PropertyDeclaration =
       this.updateFieldType(fieldPropertyDeclarationNode, fieldType);
 
+    updatedPropertyDeclarationNode =
+    this.updateFieldInitializer(updatedPropertyDeclarationNode, this.defaultValueInitializer(field.defaultValue)?.expression);
+  
     // Apply the decorator transformations  to the field property declaration node
     const [updatedPropertyDeclarationNodeTransformed, decoratorChanges] = this.applyUpdateDecoratorTransformations(updatedPropertyDeclarationNode, ...decoratorManagers);
     updatedPropertyDeclarationNode = updatedPropertyDeclarationNodeTransformed;
@@ -529,5 +532,22 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     }
     return classNode;
   }
+  
+    private updateFieldInitializer(
+      fieldPropertyDeclarationNode: ts.PropertyDeclaration,
+      initializer?: ts.Expression): ts.PropertyDeclaration {
+        if (!initializer) return fieldPropertyDeclarationNode;
+        if (this.options.sourceType === DtoSourceType.Update) return fieldPropertyDeclarationNode;
 
+        const updatedPropertyDeclaration = ts.factory.updatePropertyDeclaration(
+          fieldPropertyDeclarationNode,
+          fieldPropertyDeclarationNode.modifiers,
+          fieldPropertyDeclarationNode.name,
+          fieldPropertyDeclarationNode.questionToken,
+          fieldPropertyDeclarationNode.type, 
+          initializer // Replace with new initializer
+        );
+        return updatedPropertyDeclaration;
+    }
+  
 }
