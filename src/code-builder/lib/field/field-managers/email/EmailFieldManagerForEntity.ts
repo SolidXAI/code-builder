@@ -24,14 +24,14 @@ export class EmailFieldManagerForEntity
   override additionalColumnDecoratorOptions(): Map<string, any> {
     const additionalOptions: any = new Map<string, any>();
     additionalOptions.set('length', this.field.max ?? MAX_EMAIL_LENGTH);
-    additionalOptions.set('default', this.defaultValueInitializer(this.field.defaultValue)?.value ?? null);    
+    // additionalOptions.set('default', this.defaultValueInitializer(this.field.defaultValue)?.value ?? null);    
     return additionalOptions;
   }
 
   override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
     const additionalOptions: any = new Map<string, ts.Expression | null>();
     (this.field.max) ? additionalOptions.set('length', ts.factory.createNumericLiteral(this.field.max)) : additionalOptions.set('length', ts.factory.createNumericLiteral(MAX_EMAIL_LENGTH));
-    additionalOptions.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression ?? null);
+    // additionalOptions.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression ?? null);
     return additionalOptions;
   }
 
