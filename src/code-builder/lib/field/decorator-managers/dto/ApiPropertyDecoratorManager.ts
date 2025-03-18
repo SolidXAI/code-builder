@@ -22,7 +22,7 @@ export class ApiPropertyDecoratorManager implements DecoratorManager {
   buildDecorator(): PartialAddFieldChange {
     const fieldSourceLines = [];
     const changes: Change[] = [];
-    fieldSourceLines.push(`@${this.decoratorName()}()`);
+    fieldSourceLines.push(`@${this.decoratorName()}(${this.buildApiPropertyOptionsCode()})`);
     changes.push(...this.decoratorImports());
     return {
       filePath: this.options.source.fileName,
@@ -92,9 +92,27 @@ export class ApiPropertyDecoratorManager implements DecoratorManager {
       }
     }
 
+    const existingOptions: ts.ObjectLiteralElementLike[] = this.existingDecoratorOptions(existingDecorator);
+    
+    const newOptions: ts.ObjectLiteralElementLike[] = [];
+    if (this.options.field.description) {
+      newOptions.push(
+        ts.factory.createPropertyAssignment(
+            'description',
+            ts.factory.createStringLiteral(this.options.field?.description)
+        )
+      );
+    }
+    const mergedOptions = [
+      ...existingOptions.filter(
+          (option) => !(ts.isPropertyAssignment(option) && option.name.getText() === 'description')
+      ),
+      ...newOptions,
+    ];
+
     // Re-create the column decorator with the merged column decorator options
     const decoratorIdentifier = ts.factory.createIdentifier(this.decoratorName());
-    const argumentsArray: ts.Expression[] = [];
+    const argumentsArray: ts.Expression[] = this.createDecoratorArguments(mergedOptions);
     // const length = ts.factory.createNumericLiteral(this.options.length);
     // argumentsArray.push(length);
     if (validationOptions.length > 0) {
@@ -104,6 +122,30 @@ export class ApiPropertyDecoratorManager implements DecoratorManager {
     const call = ts.factory.createCallExpression(decoratorIdentifier, undefined, argumentsArray);
     return ts.factory.createDecorator(call)
 
+  }
+
+  private createDecoratorArguments(options: ts.ObjectLiteralElementLike[]) {
+    const argumentsArray: ts.Expression[] = [];
+    if (options.length > 0) {
+        const optionsObjectLiteral = ts.factory.createObjectLiteralExpression(options);
+        argumentsArray.push(optionsObjectLiteral);
+    }
+    return argumentsArray;
+  }
+
+  private existingDecoratorOptions(existingDecorator: ts.Decorator | undefined): ts.ObjectLiteralElementLike[] {
+      const options: ts.ObjectLiteralElementLike[] = [];
+      if (existingDecorator) {
+          const existingCallExpression = existingDecorator.expression as ts.CallExpression;
+          if (existingCallExpression.arguments.length > 0) {
+              const firstArgument = existingCallExpression.arguments[0];
+              if (!ts.isObjectLiteralExpression(firstArgument)) {
+                  throw new Error('Api Property decorator 1st argument must be an object literal');
+              }
+              options.push(...firstArgument.properties);
+          }
+      }
+      return options;
   }
 
   private findDecorator(name: string, existingModifiers: ts.NodeArray<ts.ModifierLike> | undefined): ts.Decorator | undefined {
@@ -122,6 +164,33 @@ export class ApiPropertyDecoratorManager implements DecoratorManager {
     const callExpression = m.expression as ts.CallExpression;
     const identifier = callExpression.expression as ts.Identifier;
     return identifier.text === identifierName;
+  }
+
+  private buildApiPropertyDecoratorOptions(): Map<string, any> { 
+    const options: Map<string, any> = new Map<string, any>();
+    if (this.options.field.description) {
+      options.set('description', this.options.field?.description);
+    }
+    return options;
+  }
+
+  private buildApiPropertyOptionsCode(): string {
+    const options = this.buildApiPropertyDecoratorOptions();
+    const keys = Array.from(options.keys());
+    if (keys.length === 0) {
+      return '';
+    }
+    const optionsString = keys
+      .filter((key) => options.get(key) !== null)
+      .map((key) => {
+          if (typeof options.get(key) === 'string') {
+              return `${key}: "${options.get(key)}"`;
+          } else {
+              return `${key}: ${options.get(key)}`;
+          }
+      })
+      .join(', ');
+    return `{ ${optionsString} }`;
   }
 
 }
