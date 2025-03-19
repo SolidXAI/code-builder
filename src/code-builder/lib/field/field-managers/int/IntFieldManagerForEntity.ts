@@ -22,17 +22,17 @@ export class IntFieldManagerForEntity
     };
   }
 
-  // protected override additionalColumnDecoratorOptions(): Map<string, any> {
-  //   const options = new Map<string, any>();
-  //   options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.value ?? null);
-  //   return options; 
-  // }
+  protected override additionalColumnDecoratorOptions(): Map<string, any> {
+    const options = new Map<string, any>();
+    options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.value ?? null);
+    return options; 
+  }
 
-  // protected override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
-  //   const options = new Map<string, ts.Expression | null>();
-  //   options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression ?? null);
-  //   return options
-  // }
+  protected override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
+    const options = new Map<string, ts.Expression | null>();
+    options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression ?? null);
+    return options
+  }
 
   protected override parseDefaultValue(defaultValue: string): number | null {
     if (!isInt(defaultValue)) {

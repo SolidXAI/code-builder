@@ -23,20 +23,20 @@ export class DateFieldManagerForEntity
     };
   }
 
-  // protected override additionalColumnDecoratorOptions(): Map<string, any> {
-  //   const options = new Map<string, any>();
-  //   const defaultValue = this.parseDefaultValue(this.field.defaultValue);
-  //   if (defaultValue) {
-  //     options.set('default', defaultValue.toISOString()); // Haven't used the defaultValueInitializer method here, since the default value is slightly different i.e an ISO string instead of a date object
-  //   }
-  //   return options;
-  // }
+  protected override additionalColumnDecoratorOptions(): Map<string, any> {
+    const options = new Map<string, any>();
+    const defaultValue = this.parseDefaultValue(this.field.defaultValue);
+    if (defaultValue) {
+      options.set('default', defaultValue.toISOString()); // Haven't used the defaultValueInitializer method here, since the default value is slightly different i.e an ISO string instead of a date object
+    }
+    return options;
+  }
 
-  // protected override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
-  //   const options = new Map<string, ts.Expression | null>();
-  //   options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression ?? null);
-  //   return options
-  // }
+  protected override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
+    const options = new Map<string, ts.Expression | null>();
+    options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression ?? null);
+    return options
+  }
 
   protected override parseDefaultValue(defaultValue: string): Date | null {
     if (!defaultValue) {

@@ -21,18 +21,18 @@ export class BigIntFieldManagerForEntity
     };
   }
 
-  // protected override additionalColumnDecoratorOptions(): Map<string, any> {
-  //    // Parse the default value from the field & set it to the column options
-  //   const options = new Map<string, any>();
-  //   options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.value ?? null);
-  //   return options; 
-  // }
+  protected override additionalColumnDecoratorOptions(): Map<string, any> {
+     // Parse the default value from the field & set it to the column options
+    const options = new Map<string, any>();
+    options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.value ?? null);
+    return options; 
+  }
 
-  // protected override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
-  //   const options = new Map<string, ts.Expression | null>();
-  //   options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression as ts.Expression ?? null);
-  //   return options
-  // }
+  protected override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
+    const options = new Map<string, ts.Expression | null>();
+    options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression as ts.Expression ?? null);
+    return options
+  }
 
   protected override parseDefaultValue(defaultValue: string): bigint | null {
     if (!defaultValue)  return null;
