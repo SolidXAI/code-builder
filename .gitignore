@@ -37,6 +37,6 @@ lerna-debug.log*
 private.notes.txt
 
 # Ignore js files, since ts files are compiled to js files
-**/*.js
+# **/*.js
 **/*.js.map
 **/*.d.ts
