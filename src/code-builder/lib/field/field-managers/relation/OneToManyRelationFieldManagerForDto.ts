@@ -84,7 +84,7 @@ export class OneToManyRelationFieldManagerForDto
 
   override addField(): FieldChange[] {
     const fieldChanges: FieldChange[] = super.addField();
-    if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) {
+    if (fieldChanges.length > 0) {
       const mainField = fieldChanges[0];
       mainField.changes.push(this.relatedFieldImport());
     }
@@ -143,10 +143,10 @@ export class OneToManyRelationFieldManagerForDto
     // if (containsAddFieldChanges) return fieldChanges;
 
     //This line is required to add import changes in the update context
-    // if (fieldChanges.length > 0 && this.modelName !== this.field.relationCoModelSingularName) {
-    const mainField = fieldChanges[0];
-    mainField.changes.push(this.relatedFieldImport());
-    // }
+    if (fieldChanges.length > 0) {
+      const mainField = fieldChanges[0];
+      mainField.changes.push(this.relatedFieldImport());
+    }
     return fieldChanges
   }
 
