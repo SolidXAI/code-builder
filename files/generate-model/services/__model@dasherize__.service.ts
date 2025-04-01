@@ -6,9 +6,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { CRUDService } from '<%= calculateModuleFileImportPath(module,"src/services/crud.service") %>';
 import { ModelMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/model-metadata.service") %>';
 import { ModuleMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/module-metadata.service") %>';
-import { MediaStorageProviderMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/media-storage-provider-metadata.service") %>';
 import { ConfigService } from '@nestjs/config';
-import { MediaService } from '<%= calculateModuleFileImportPath(module,"src/services/media.service") %>';
 import { FileService } from '<%= calculateModuleFileImportPath(module,"src/services/file.service") %>';
 import { CrudHelperService } from '<%= calculateModuleFileImportPath(module,"src/services/crud-helper.service") %>';
 
