@@ -24,6 +24,10 @@
       "type": "string",
       "description": "This will indicate model has soft delete enabled"
     },
+    "parentModel": {
+      "type": "string",
+      "description": "The parent model name for the model"
+    }
     "fields": {
       "oneOf": [
         {

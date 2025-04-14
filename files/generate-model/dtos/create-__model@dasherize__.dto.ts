@@ -1,1 +1,1 @@
-export class Create<%= classify(model) %>Dto {}
+export class Create<%= classify(model) %>Dto<%= parentModel ? ` extends Create${classify(parentModel)}Dto` : `` %> {}
