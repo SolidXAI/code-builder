@@ -27,7 +27,7 @@
     "parentModel": {
       "type": "string",
       "description": "The parent model name for the model"
-    }
+    },
     "fields": {
       "oneOf": [
         {
