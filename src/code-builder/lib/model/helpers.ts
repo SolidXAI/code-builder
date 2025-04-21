@@ -167,19 +167,19 @@ function safeApplyChanges(
   moduleName: string,
   filePath: string,
   changes: Change[],
-  generateChecksum: boolean=false
+  generateChecksum: boolean = false
 ) {
   const uniqueChanges = deDuplicateByDescription(changes);
 
   // Get all the insert changes
   const insertChanges = uniqueChanges.filter((change) => change instanceof InsertChange);
- 
+
   // Get all the replace and remove changes
   const replaceAndRemoveChanges = uniqueChanges.filter(
     (change) => change instanceof ReplaceChangeSSS || change instanceof RemoveChangeSSS
   );
   const { replaceChangesArray, removeChangesArray } = deDuplicateByPosition(replaceAndRemoveChanges);
-  
+
   const safeChanges = [...insertChanges, ...replaceChangesArray, ...removeChangesArray];
   applyChanges(tree, filePath, safeChanges)
   generateChecksum ? handleUpdateChecksums(tree, moduleName, filePath) : "no-ops";
@@ -227,7 +227,7 @@ function createBackup(tree: Tree, filePath: string, fileContent: string) {
   }
 }
 
-export function loadModuleMetadata(tree: Tree, moduleName: string) : ModuleMetadataConfiguration {
+export function loadModuleMetadata(tree: Tree, moduleName: string): ModuleMetadataConfiguration {
   const moduleMetadataFilePath = getModuleMetadataFilePath(moduleName);
   const metadata: ModuleMetadataConfiguration = tree.exists(moduleMetadataFilePath) ? JSON.parse(tree.readText(moduleMetadataFilePath)) : null;
   if (!metadata.checksums) metadata.checksums = [];
@@ -268,7 +268,7 @@ function applyChanges(tree: Tree, filePath: string, changes: Change[]) {
     createBackup(tree, filePath, fileContent);
   }*/
 
-  const updateRecorder = tree.beginUpdate(filePath); 
+  const updateRecorder = tree.beginUpdate(filePath);
   changes.forEach((change) => {
     if (change instanceof InsertChange) {
       updateRecorder.insertLeft(change.pos, change.toAdd);
@@ -279,7 +279,7 @@ function applyChanges(tree: Tree, filePath: string, changes: Change[]) {
       // console.log(`inserting ${change.newText} at ${change.replacePosition}`);
       updateRecorder.insertLeft(change.replacePosition, change.newText);
       // console.log('source', updateRecorder.getText());
-    } 
+    }
     else if (change instanceof RemoveChangeSSS) {
       updateRecorder.remove(change.removePosition, change.toRemove.length);
     }
@@ -318,10 +318,10 @@ export function removeField(tree: Tree, options: any, field: any) {
     );
 
     const entityFieldChanges = fieldHandler.removeEntityField();
-    applyFieldChanges(tree,options.module, entityFieldChanges, options?.generateChecksum)
+    applyFieldChanges(tree, options.module, entityFieldChanges, options?.generateChecksum)
 
     const dtoFieldChanges = fieldHandler.removeDtoField();
-    applyFieldChanges(tree,options.module, dtoFieldChanges, options?.generateChecksum)
+    applyFieldChanges(tree, options.module, dtoFieldChanges, options?.generateChecksum)
 
   } catch (e) {
     console.error('Error while removing field' + field.name, e);
@@ -350,25 +350,25 @@ export function updateField(tree: Tree, options: any, field: any) {
   }
 }
 
-function applyFieldChanges(tree: Tree, moduleName: string, fieldChanges: FieldChange[], generateChecksum: boolean=false) {
-    // Collect the changes file wise into a map, i.e all changes related to a file get applied together
-    const changesMap = new Map<string, Change[]>();
-    fieldChanges.forEach((fieldChange) => {
-      const changes = changesMap.get(fieldChange.filePath) ?? [];
-      changes.push(...fieldChange.changes);
-      changesMap.set(fieldChange.filePath, changes);
-    });
-    
-    //Apply the changes to the file
-    changesMap.forEach((changes, filePath) => {
-      safeApplyChanges(
-        tree,
-        moduleName,
-        filePath,
-        changes,
-        generateChecksum
-      );
-    });
+function applyFieldChanges(tree: Tree, moduleName: string, fieldChanges: FieldChange[], generateChecksum: boolean = false) {
+  // Collect the changes file wise into a map, i.e all changes related to a file get applied together
+  const changesMap = new Map<string, Change[]>();
+  fieldChanges.forEach((fieldChange) => {
+    const changes = changesMap.get(fieldChange.filePath) ?? [];
+    changes.push(...fieldChange.changes);
+    changesMap.set(fieldChange.filePath, changes);
+  });
+
+  //Apply the changes to the file
+  changesMap.forEach((changes, filePath) => {
+    safeApplyChanges(
+      tree,
+      moduleName,
+      filePath,
+      changes,
+      generateChecksum
+    );
+  });
 }
 
 // Read all the files with the given fileNames and update the checksum in the checksum file
@@ -519,7 +519,17 @@ export function takeBackupIfChecksumsMismatch(tree: Tree, moduleName: string) {
 }
 
 export function calculateModuleFileImportPath(moduleName: string, internalPath: string) {
- return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
+  return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
+}
+
+export function outputParentImportPath(parentModel: string | null = null, parentModule: string = "solid-core") {
+  let importPath: string = SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
+  let importSymbol: string = "CommonEntity";
+  if (parentModel != null) {
+    importPath = parentModule === 'solid-core' ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`;
+    importSymbol = `${classify(parentModel)}`;
+  }
+  return `import { ${importSymbol} } from '${importPath}';`;
 }
 
 export function unSnakeCase(name: string) {
