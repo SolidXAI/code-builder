@@ -28,6 +28,10 @@
       "type": "string",
       "description": "The parent model name for the model"
     },
+    "parentModule": {
+      "type": "string",
+      "description": "The parent model name for the model"
+    },
     "fields": {
       "oneOf": [
         {
@@ -51,5 +55,8 @@
       "default": false
     }
   },
-  "required": ["module", "model"]
+  "required": [
+    "module",
+    "model"
+  ]
 }
