@@ -5,9 +5,6 @@ import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/
 import { insertImport } from '@schematics/angular/utility/ast-utils';
 import { Change, InsertChange } from '@schematics/angular/utility/change';
 import * as crypto from 'crypto';
-export const SOLID_CORE_MODULE_NAME = 'solid-core';
-export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidstarters/solid-core';
-
 import {
   DtoSourceType,
   FieldChange,
@@ -15,6 +12,10 @@ import {
   ReplaceChangeSSS,
   getFieldHandler,
 } from '../field/FieldManager';
+
+export const SOLID_CORE_MODULE_NAME = 'solid-core';
+export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidstarters/solid-core';
+
 
 // export const CHECKSUM_FILE_PATH = 'code-builder/output/checksums.json';
 export const CHECKSUM_HASH_ALGORITHM = 'md5';
@@ -527,7 +528,7 @@ export function outputParentImportPathForEntity(parentModel: string | null = nul
   let importPath: string = SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
   let importSymbol: string = "CommonEntity";
   if (parentModel != null) {
-    importPath = parentModule === 'solid-core' ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`;
     importSymbol = `${classify(parentModel)}`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
@@ -537,14 +538,13 @@ export function outputParentImportPathForDto(parentModel: string | null = null, 
   if (parentModel == null || parentModule == null) {
     return "";
   }
-
-  let importPath = parentModule === 'solid-core' ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`;
-  let importSymbol = `${classify(parentModel)}`;
+  let importPath = ``;
+  let importSymbol = ``;
   if (context === DtoSourceType.Update) {
-    importPath = parentModule === 'solid-core' ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/dtos/update-${dasherize(parentModel)}.dto.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/dtos/update-${dasherize(parentModel)}.dto.ts`;
     importSymbol = `Update${classify(parentModel)}Dto`;
   } else if (context === DtoSourceType.Create) {
-    importPath = parentModule === 'solid-core' ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/dtos/create-${dasherize(parentModel)}.dto.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/dtos/create-${dasherize(parentModel)}.dto.ts`;
     importSymbol = `Create${classify(parentModel)}Dto`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
