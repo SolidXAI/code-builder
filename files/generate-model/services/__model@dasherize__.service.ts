@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { FileService } from '<%= calculateModuleFileImportPath(module,"src/services/file.service") %>';
 import { CrudHelperService } from '<%= calculateModuleFileImportPath(module,"src/services/crud-helper.service") %>';
 
-
+import { <%= classify(model) %> } from '../entities/<%= dasherize(model) %>.entity';
 import { <%= classify(model) %>Repository } from '../repositories/<%= dasherize(model) %>.repository';
 
 @Injectable()
