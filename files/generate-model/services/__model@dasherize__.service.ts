@@ -11,7 +11,7 @@ import { FileService } from '<%= calculateModuleFileImportPath(module,"src/servi
 import { CrudHelperService } from '<%= calculateModuleFileImportPath(module,"src/services/crud-helper.service") %>';
 
 
-import { <%= classify(model) %> } from '../entities/<%= dasherize(model) %>.entity';
+import { <%= classify(model) %>Repository } from '../repositories/<%= dasherize(model) %>.repository';
 
 @Injectable()
 export class <%= classify(model) %>Service extends CRUDService<<%= classify(model) %>>{
@@ -24,8 +24,7 @@ export class <%= classify(model) %>Service extends CRUDService<<%= classify(mode
     readonly crudHelperService: CrudHelperService,
     @InjectEntityManager()
     readonly entityManager: EntityManager,
-    @InjectRepository(<%= classify(model) %>, '<%= dataSource %>')
-    readonly repo: Repository<<%= classify(model) %>>,
+    readonly repo: <%= classify(model) %>Repository,
     readonly moduleRef: ModuleRef
 
  ) {
