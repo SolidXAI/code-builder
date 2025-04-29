@@ -34,8 +34,9 @@ export enum SolidProviderType {
 
 export enum ModuleMetadataType {
   TypeOrmImports = 'imports',
-  Providers = 'providers',
+  Service = 'service',
   Controllers = 'controllers',
+  Repository = 'repository',
 }
 
 export type ImportData = {
@@ -71,13 +72,15 @@ export function getModuleMetadata(
         metadata: 'imports',
         symbol: `TypeOrmModule.forFeature([${classify(modelName)}])`
       };
-    case ModuleMetadataType.Providers:
-      return { metadata: 'providers', symbol: `${classify(modelName)}Service,${classify(modelName)}Repository` };
+    case ModuleMetadataType.Service:
+      return { metadata: 'providers', symbol: `${classify(modelName)}Service` };
     case ModuleMetadataType.Controllers:
       return {
         metadata: 'controllers',
         symbol: `${classify(modelName)}Controller`,
       };
+    case ModuleMetadataType.Repository:
+      return { metadata: 'providers', symbol: `${classify(modelName)}Repository` };
     default:
       throw Error('Invalid ModuleMetadataType');
   }
