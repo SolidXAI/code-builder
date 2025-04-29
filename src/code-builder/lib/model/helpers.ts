@@ -29,6 +29,7 @@ export enum SolidProviderType {
   Dto = 'Dto',
   Service = 'Service',
   Controller = 'Controller',
+  Repository = 'Repository'
 }
 
 export enum ModuleMetadataType {
@@ -71,7 +72,7 @@ export function getModuleMetadata(
         symbol: `TypeOrmModule.forFeature([${classify(modelName)}])`
       };
     case ModuleMetadataType.Providers:
-      return { metadata: 'providers', symbol: `${classify(modelName)}Service` };
+      return { metadata: 'providers', symbol: `${classify(modelName)}Service,${classify(modelName)}Repository` };
     case ModuleMetadataType.Controllers:
       return {
         metadata: 'controllers',
@@ -107,6 +108,11 @@ export function getSolidImports(
         symbolName: `${classify(modelName)}`,
         importPath: `./entities/${dasherize(modelName)}.entity`,
       };
+      case SolidProviderType.Repository:
+        return {
+          symbolName: `${classify(modelName)}Repository`,
+          importPath: `./repositories/${dasherize(modelName)}.repository`,
+        };
     default:
       throw Error('Invalid SolidProviderType');
   }

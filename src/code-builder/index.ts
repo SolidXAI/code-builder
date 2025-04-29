@@ -152,6 +152,10 @@ function addModuleImportsAndMetadata(options: any) { // TODO This method should 
         options.model,
         generateModelHelpers.SolidProviderType.Controller,
       ),
+      generateModelHelpers.getSolidImports(
+        options.model,
+        generateModelHelpers.SolidProviderType.Repository,
+      ),
     ];
     generateModelHelpers.addImports(tree, moduleFilePath, moduleImports);
 
