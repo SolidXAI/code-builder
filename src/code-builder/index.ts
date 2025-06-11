@@ -171,7 +171,11 @@ function addModuleImportsAndMetadata(options: any) { // TODO This method should 
       ),
       generateModelHelpers.getModuleMetadata(
         options.model,
-        generateModelHelpers.ModuleMetadataType.Providers,
+        generateModelHelpers.ModuleMetadataType.Service,
+      ),
+      generateModelHelpers.getModuleMetadata(
+        options.model,
+        generateModelHelpers.ModuleMetadataType.Repository,
       ),
     ];
     generateModelHelpers.addModuleMetadata(

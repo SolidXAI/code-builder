@@ -32,6 +32,11 @@
       "type": "string",
       "description": "The parent model name for the model"
     },
+    "draftPublishWorkflowEnabled": {
+      "type": "string",
+      "description": "Whether the draft publish workflow is enabled for the model",
+      "default": "false"
+    },
     "fields": {
       "oneOf": [
         {
