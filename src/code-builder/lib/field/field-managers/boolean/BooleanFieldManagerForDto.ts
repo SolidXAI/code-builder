@@ -59,7 +59,7 @@ export class BooleanFieldManagerForDto
 
   protected override parseDefaultValue(defaultValue: string): boolean | null {
     try {
-      return Boolean(defaultValue);
+      return defaultValue === 'true' ? true : false;
     }
     catch (e) {
       // console.log(`Could not set default value ${defaultValue}  for field ${this.field.name} in model ${this.modelName}`);
