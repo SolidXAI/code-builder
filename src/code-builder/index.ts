@@ -54,15 +54,13 @@ export function refreshModel(options: any): Rule {
 
     // If the model related code is not present, then add it by call addModel, else call update field with the fields provided
     const modelEntityFilePath = `${modulePath}/entities/${dasherize(options.model)}.entity.ts`;
-    // console.log('Model Entity File Path: ', modelEntityFilePath);
+    const rules : Rule[] = [];
     if (!tree.exists(modelEntityFilePath)) {
-      // console.log('Model does not exist, adding model');
-      return addModel(options)(tree, _context);
+      rules.push(addModel(options));
     }
-    else {
-      // console.log('Model does not exist, updating fields');
-      return updateFields(options)(tree, _context);
-    }
+    // Always call update fields to ensure the formatting and other aspects are updated
+    rules.push(updateFields(options));
+    return chain(rules)(tree, _context);
   };
 }
 
