@@ -13,10 +13,39 @@ export class ComputedFieldManagerForEntity
   }
 
   fieldType(): FieldType {
-    return {
-      text: 'string',
-      node: (_field: any) => ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
-    };
+    const computedFieldValueType = this.field.computedFieldValueType ?? 'string';
+    switch (computedFieldValueType) {
+      case 'int':
+        return {
+          text: 'number',
+          node: (_field: any) => ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword),
+        };
+      case 'decimal':
+        return {
+          text: 'number',
+          node: (_field: any) => ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword),
+        };
+      case 'boolean':
+        return {
+          text: 'boolean',
+          node: (_field: any) => ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword),
+        };
+      case 'date':
+      case 'datetime':
+        return {
+          text: 'Date',
+          node: (_field: any) =>
+            ts.factory.createTypeReferenceNode(
+              ts.factory.createIdentifier("Date"),
+              undefined
+            )
+        };
+      default:
+        return {
+          text: 'string',
+          node: (_field: any) => ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
+        };
+    }
   }
 
 
