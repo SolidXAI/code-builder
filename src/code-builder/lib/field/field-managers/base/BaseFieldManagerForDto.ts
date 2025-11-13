@@ -476,7 +476,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
         case DecoratorType.Optional:
           return new OptionalDecoratorManager({ isApplyOptional: true, optional: (this.options.sourceType === DtoSourceType.Update || !field.required), source: source, field: field });
         case DecoratorType.Regex:
-          return new RegexDecoratorManager({ isApplyRegex: this.isApplyRegex(), regexPattern: field.regexPattern, source: source, field: field });
+          return new RegexDecoratorManager({ isApplyRegex: this.isApplyRegex(), regexPattern: field.regexPattern, regexPatternNotMatchingErrorMsg: field.regexPatternNotMatchingErrorMsg, source: source, field: field });
         case DecoratorType.Number:
           return new NumberDecoratorManager({ isNumber: this.isNumber(), source: source, field: field });
         case DecoratorType.String:

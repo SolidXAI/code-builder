@@ -7,6 +7,7 @@ import _ from "lodash";
 export interface RegexDecoratorOptions {
   isApplyRegex: boolean;
   regexPattern: string;
+  regexPatternNotMatchingErrorMsg?: string;
   source: ts.SourceFile;
   field: any;
 }
@@ -18,7 +19,12 @@ export class RegexDecoratorManager implements DecoratorManager {
   buildDecorator(): PartialAddFieldChange {
     const fieldSourceLines = [];
     const changes: Change[] = [];
-    fieldSourceLines.push(`@Matches(/${this.options.regexPattern}/)`);
+    const notMatchingErrorMsg = this.options.regexPatternNotMatchingErrorMsg;
+    if (notMatchingErrorMsg && notMatchingErrorMsg.trim().length > 0) {
+      fieldSourceLines.push(`@Matches(/${this.options.regexPattern}/, { message: ${JSON.stringify(notMatchingErrorMsg)} })`);
+    } else {
+      fieldSourceLines.push(`@Matches(/${this.options.regexPattern}/)`);
+    }
     changes.push(...this.decoratorImports());
 
     return {
