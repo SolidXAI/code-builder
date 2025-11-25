@@ -5,7 +5,7 @@ import { insertImport } from "@schematics/angular/utility/ast-utils";
 import { Change } from "@schematics/angular/utility/change";
 
 //TODO : Need to support column default e.g if type is a date field, the ormType should be deduced automatically depending upon the db used
-interface ColumnDecoratorOptions {
+export interface ColumnDecoratorOptions {
     isColumn: boolean;
     columnName: string;
     type: string;

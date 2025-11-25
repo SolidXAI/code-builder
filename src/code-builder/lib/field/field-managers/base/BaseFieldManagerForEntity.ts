@@ -29,11 +29,13 @@ import { RelationType } from "../../FieldManager";
 import { UniqueIndexDecoratorManager } from '../../decorator-managers/entity/UniqueIndexDecoratorManager';
 import { JoinColumnDecoratorManager } from '../../decorator-managers/entity/JoinColumnDecoratorManager';
 import { OneToManyDecoratorManager } from '../../decorator-managers/entity/OneToManyDecoratorManager';
+import { PrimaryColumnDecoratorManager } from '../../decorator-managers/entity/PrimaryColumnDecoratorManager';
 
 export abstract class BaseFieldManagerForEntity implements FieldManager {
   source: SourceFile;
   indexDecoratorManager: IndexDecoratorManager;
   columnDecoratorManager: ColumnDecoratorManager;
+  primaryColumnDecoratorManager: PrimaryColumnDecoratorManager;
   manyToOneDecoratorManager: ManyToOneDecoratorManager;
   joinColumnDecoratorManager: DecoratorManager;
   manyToManyDecoratorManager: DecoratorManager;
@@ -68,6 +70,19 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         columnName: this.field.columnName,
         type: this.field.ormType,
         required: this.field.required,
+        otherOptions: this.additionalColumnDecoratorOptions(),
+        otherOptionExpressions: this.additionalColumnDecoratorOptionExpressions(),
+        source: this.source,
+        field: this.field,
+      },
+      fieldPropertyDeclarationNode,
+    );
+    this.primaryColumnDecoratorManager = new PrimaryColumnDecoratorManager(
+      {
+        required: true,
+        isColumn: this.isPrimaryColumn(),
+        columnName: this.field.columnName,
+        type: this.field.ormType,
         otherOptions: this.additionalColumnDecoratorOptions(),
         otherOptionExpressions: this.additionalColumnDecoratorOptionExpressions(),
         source: this.source,
@@ -479,7 +494,11 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   }
 
   private isColumn(): boolean {
-    return this.field.type !== 'relation';
+    return this.field.type !== 'relation' && this.field.isPrimary !== true;
+  }
+
+  private isPrimaryColumn(): boolean {
+    return this.field.type !== 'relation' && this.field.isPrimary === true;
   }
 
   protected applyUpdateDecoratorTransformations(fieldPropertyDeclarationNode: ts.PropertyDeclaration, ...transformers: DecoratorManager[]): [ts.PropertyDeclaration, Change[]] {
@@ -517,7 +536,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   }
 
   private decoratorManagers(): DecoratorManager[] {
-    return [this.indexDecoratorManager, this.columnDecoratorManager, this.manyToOneDecoratorManager, this.joinColumnDecoratorManager, this.manyToManyDecoratorManager, this.joinTableDecoratorManager, this.oneToManyDecoratorManager];
+    return [this.indexDecoratorManager, this.columnDecoratorManager, this.primaryColumnDecoratorManager, this.manyToOneDecoratorManager, this.joinColumnDecoratorManager, this.manyToManyDecoratorManager, this.joinTableDecoratorManager, this.oneToManyDecoratorManager];
   }
 
   protected addAdditionalField(): FieldChange[] {

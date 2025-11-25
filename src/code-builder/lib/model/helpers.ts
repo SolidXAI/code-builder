@@ -533,9 +533,9 @@ export function calculateModuleFileImportPath(moduleName: string, internalPath: 
   return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
 }
 
-export function outputParentImportPathForEntity(parentModel: string | null = null, parentModule: string = "solid-core") {
+export function outputEntitySuperClassImport(isLegacyTable: boolean = false, parentModel: string | null = null, parentModule: string = "solid-core") {
   let importPath: string = SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
-  let importSymbol: string = "CommonEntity";
+  let importSymbol: string = isLegacyTable ? "LegacyCommonEntity" : "CommonEntity";
   if (parentModel != null) {
     importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`;
     importSymbol = `${classify(parentModel)}`;
