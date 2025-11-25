@@ -37,6 +37,11 @@
       "description": "Whether the draft publish workflow is enabled for the model",
       "default": "false"
     },
+    "isLegacyTable": {
+      "type": "string",
+      "description": "Indicates whether the table is a legacy table",
+      "default": "false"
+    },
     "fields": {
       "oneOf": [
         {

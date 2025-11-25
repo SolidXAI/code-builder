@@ -494,11 +494,11 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   }
 
   private isColumn(): boolean {
-    return this.field.type !== 'relation' && this.field.isPrimary !== true;
+    return this.field.type !== 'relation' && this.field.isPrimaryKey !== true;
   }
 
   private isPrimaryColumn(): boolean {
-    return this.field.type !== 'relation' && this.field.isPrimary === true;
+    return this.field.type !== 'relation' && this.field.isPrimaryKey === true;
   }
 
   protected applyUpdateDecoratorTransformations(fieldPropertyDeclarationNode: ts.PropertyDeclaration, ...transformers: DecoratorManager[]): [ts.PropertyDeclaration, Change[]] {
