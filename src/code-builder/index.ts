@@ -49,10 +49,9 @@ export function addModule(options: any): Rule {
 }
 
 export function refreshModel(options: any): Rule {
-  // console.log(`[codebuilder] Pre-process: isLegacy table option received in refresh-model: ${options.isLegacyTable} and type is ${typeof options.isLegacyTable}`);
   //Handle the isLegacyTable option and parse it to boolean
   options.isLegacyTable = options.isLegacyTable === 'true' ? true : false;
-  // console.log(`[codebuilder] Post-process: isLegacy table option received in refresh-model: ${options.isLegacyTable} and type is ${typeof options.isLegacyTable}`);
+  options.isLegacyTableWithId = options.isLegacyTableWithId === 'true' ? true : false;
 
   return (tree: Tree, _context: SchematicContext) => {
     const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
