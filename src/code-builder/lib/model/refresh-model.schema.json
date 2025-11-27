@@ -42,6 +42,11 @@
       "description": "Indicates whether the table is a legacy table",
       "default": "false"
     },
+    "dataSourceType": {
+      "type": "string",
+      "description": "The data source type of the model",
+      "enum": ["postgres", "mssql"]
+    },
     "fields": {
       "oneOf": [
         {

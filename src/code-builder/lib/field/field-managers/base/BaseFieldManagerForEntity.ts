@@ -30,6 +30,7 @@ import { UniqueIndexDecoratorManager } from '../../decorator-managers/entity/Uni
 import { JoinColumnDecoratorManager } from '../../decorator-managers/entity/JoinColumnDecoratorManager';
 import { OneToManyDecoratorManager } from '../../decorator-managers/entity/OneToManyDecoratorManager';
 import { PrimaryColumnDecoratorManager } from '../../decorator-managers/entity/PrimaryColumnDecoratorManager';
+import { SupportedDatabases } from 'src/code-builder/lib/model/db-helpers';
 
 export abstract class BaseFieldManagerForEntity implements FieldManager {
   source: SourceFile;
@@ -47,7 +48,8 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     protected readonly moduleName: string,
     protected readonly modelName: string,
     protected readonly field: any,
-    protected readonly modelEnableSoftDelete?: any
+    protected readonly modelEnableSoftDelete?: any,
+    protected readonly dataSourceType?: SupportedDatabases
   ) {
     // TODO: Note that the source file instance is created during construction
     // So every operation should use a new instance of the field manager, so updated tree/source is used before each operation

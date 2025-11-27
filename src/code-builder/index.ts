@@ -69,7 +69,7 @@ export function refreshModel(options: any): Rule {
   };
 }
 
-export function addModel(options: any): Rule {
+function addModel(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
     // If the module is solid-core, the code needs to be generated in src/ since solid-core-module is a library & there is only 1 module
     const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
@@ -98,7 +98,7 @@ function normalizeFieldType(fields: string| string[]): string[] {
   return fields; 
 }
 
-export function addFields(options: any): Rule {
+function addFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
@@ -109,7 +109,7 @@ export function addFields(options: any): Rule {
   };
 }
 
-export function updateFields(options: any): Rule {
+function updateFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
@@ -215,7 +215,7 @@ function showTree(sourceNode: ts.SourceFile){
   printAllChildren(sourceNode, 0);
 }
 
-export function updateChecksum(moduleName: string, generateChecksum: boolean = false, ...filePaths: string[]): Rule {
+function updateChecksum(moduleName: string, generateChecksum: boolean = false, ...filePaths: string[]): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     if (!generateChecksum) {
       return tree;

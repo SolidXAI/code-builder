@@ -2,6 +2,7 @@ import { Tree } from '@angular-devkit/schematics';
 import { DtoSourceType, FieldChange, FieldHandler, FieldManager, ManagerForDtoOptions } from '../../FieldManager';
 import { LongTextFieldManagerForDto } from './LongTextFieldManagerForDto';
 import { LongTextFieldManagerForEntity } from './LongTextFieldManagerForEntity';
+import { SupportedDatabases } from 'src/code-builder/lib/model/db-helpers';
 
 export class LongTextFieldHandler implements FieldHandler {
   entityFieldManager: FieldManager;
@@ -13,14 +14,16 @@ export class LongTextFieldHandler implements FieldHandler {
     moduleName: string,
     modelName: string,
     field: string,
-    modelEnableSoftDelete: any
+    modelEnableSoftDelete: any,
+    dataSourceType?: SupportedDatabases
   ) {
     this.entityFieldManager = new LongTextFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
-      modelEnableSoftDelete
+      modelEnableSoftDelete,
+      dataSourceType
     );
     this.createDtoFieldManager = new LongTextFieldManagerForDto(
       tree,

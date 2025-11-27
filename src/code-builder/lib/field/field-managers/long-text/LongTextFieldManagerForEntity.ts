@@ -2,29 +2,39 @@ import { Tree } from '@angular-devkit/schematics';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { FieldManager, FieldType } from '../../FieldManager';
 import { BaseFieldManagerForEntity } from '../base/BaseFieldManagerForEntity';
+import { SupportedDatabases, transformColumnOptionForDatabase } from 'src/code-builder/lib/model/db-helpers';
 
 //FIXME Implementation pending
 export class LongTextFieldManagerForEntity
   extends BaseFieldManagerForEntity
-  implements FieldManager
-{
+  implements FieldManager {
   source: ts.SourceFile;
 
-  constructor(tree: Tree, moduleName: string, modelName: string, field: any, modelEnableSoftDelete: any) {
-    super(tree, moduleName, modelName, field, modelEnableSoftDelete);
+  constructor(tree: Tree, moduleName: string, modelName: string, field: any, modelEnableSoftDelete: any, dataSourceType?: SupportedDatabases) {
+    super(tree, moduleName, modelName, field, modelEnableSoftDelete, dataSourceType);
   }
 
   fieldType(): FieldType {
     return {
       text: 'string',
-      node:  (_field: any) => ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
+      node: (_field: any) => ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
     };
   }
 
   protected override additionalColumnDecoratorOptions(): Map<string, any> {
     const options = new Map<string, any>();
+    if (this.field.max) {
+      options.set('length', transformColumnOptionForDatabase(
+        'length',
+        this.field.max,
+        this.field.ormType,
+        this.dataSourceType,
+      )
+      );
+    }
+
     options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.value ?? null);
-    return options; 
+    return options;
   }
 
   protected override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
