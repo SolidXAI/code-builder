@@ -10,7 +10,7 @@ export function transformColumnOptionForDatabase(
   optionValue: any,
   ormType: string,
   dataSourceType?: SupportedDatabases,
-): any {
+): unknown {
   if (dataSourceType === SupportedDatabases.Mssql) {
     if (optionKey === 'length' && optionValue === -1 && (ormType === 'varchar' || ormType === 'nvarchar')) {
       return 'MAX';

@@ -114,7 +114,6 @@ function updateFields(options: any): Rule {
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
     options?.generateChecksum ? generateModelHelpers.takeBackupIfChecksumsMismatch(tree, options.module) : "no-ops";
-
     fields.forEach((field: any) => {
       generateModelHelpers.updateField(tree, options, field);
     });
