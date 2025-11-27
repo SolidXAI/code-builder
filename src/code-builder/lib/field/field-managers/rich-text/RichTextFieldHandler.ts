@@ -2,7 +2,7 @@ import { Tree } from '@angular-devkit/schematics';
 import { DtoSourceType, FieldChange, FieldHandler, FieldManager, ManagerForDtoOptions } from '../../FieldManager';
 import { RichTextFieldManagerForDto } from './RichTextFieldManagerForDto';
 import { RichTextFieldManagerForEntity } from './RichTextFieldManagerForEntity';
-import { SupportedDatabases } from 'src/code-builder/lib/model/db-helpers';
+import { SupportedDatabases } from '../../db-helpers';
 
 export class RichTextFieldHandler implements FieldHandler {
   entityFieldManager: FieldManager;

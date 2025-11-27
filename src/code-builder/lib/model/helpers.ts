@@ -12,7 +12,7 @@ import {
   ReplaceChangeSSS,
   getFieldHandler,
 } from '../field/FieldManager';
-import { SupportedDatabases } from './db-helpers';
+import { SupportedDatabases } from '../field/db-helpers';
 
 export const SOLID_CORE_MODULE_NAME = 'solid-core';
 export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidstarters/solid-core';

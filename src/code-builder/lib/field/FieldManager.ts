@@ -22,7 +22,7 @@ import { UUIDFieldHandler } from './field-managers/uuid/UUIDFieldHandler';
 import { SOLID_CORE_MODULE_NAME, SOLID_CORE_MODULE_NPM_PACKAGE_NAME } from '../model/helpers';
 import { OneToManyRelationFieldHandler } from './field-managers/relation/OneToManyRelationFieldHandler';
 import { ManyToManyInverseRelationFieldHandler } from './field-managers/relation/ManyToManyInverseRelationFieldHandler';
-import { SupportedDatabases } from '../model/db-helpers';
+import { SupportedDatabases } from './db-helpers';
 
 export const MAX_EMAIL_LENGTH = 254;
 export const UUID_REGEX = `^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;

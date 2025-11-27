@@ -30,7 +30,7 @@ import { UniqueIndexDecoratorManager } from '../../decorator-managers/entity/Uni
 import { JoinColumnDecoratorManager } from '../../decorator-managers/entity/JoinColumnDecoratorManager';
 import { OneToManyDecoratorManager } from '../../decorator-managers/entity/OneToManyDecoratorManager';
 import { PrimaryColumnDecoratorManager } from '../../decorator-managers/entity/PrimaryColumnDecoratorManager';
-import { SupportedDatabases } from 'src/code-builder/lib/model/db-helpers';
+import { SupportedDatabases } from '../..//db-helpers';
 
 export abstract class BaseFieldManagerForEntity implements FieldManager {
   source: SourceFile;
