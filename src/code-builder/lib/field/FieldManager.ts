@@ -22,6 +22,7 @@ import { UUIDFieldHandler } from './field-managers/uuid/UUIDFieldHandler';
 import { SOLID_CORE_MODULE_NAME, SOLID_CORE_MODULE_NPM_PACKAGE_NAME } from '../model/helpers';
 import { OneToManyRelationFieldHandler } from './field-managers/relation/OneToManyRelationFieldHandler';
 import { ManyToManyInverseRelationFieldHandler } from './field-managers/relation/ManyToManyInverseRelationFieldHandler';
+import { SupportedDatabases } from './db-helpers';
 
 export const MAX_EMAIL_LENGTH = 254;
 export const UUID_REGEX = `^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`;
@@ -183,6 +184,7 @@ export function getFieldHandler(
   modelName: string,
   field: any,
   modelEnableSoftDelete: any,
+  dataSourceType?: SupportedDatabases
 ): FieldHandler {
   switch (field.type) {
     case SolidFieldType.shortText:
@@ -193,9 +195,9 @@ export function getFieldHandler(
       }
       return new ShortTextFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.longtext:
-      return new LongTextFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
+      return new LongTextFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete, dataSourceType);
     case SolidFieldType.richText:
-      return new RichTextFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
+      return new RichTextFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete, dataSourceType);
     case SolidFieldType.json:
       return new JsonFieldHandler(tree, moduleName, modelName, field, modelEnableSoftDelete);
     case SolidFieldType.int:

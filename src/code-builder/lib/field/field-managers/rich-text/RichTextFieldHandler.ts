@@ -2,6 +2,7 @@ import { Tree } from '@angular-devkit/schematics';
 import { DtoSourceType, FieldChange, FieldHandler, FieldManager, ManagerForDtoOptions } from '../../FieldManager';
 import { RichTextFieldManagerForDto } from './RichTextFieldManagerForDto';
 import { RichTextFieldManagerForEntity } from './RichTextFieldManagerForEntity';
+import { SupportedDatabases } from '../../db-helpers';
 
 export class RichTextFieldHandler implements FieldHandler {
   entityFieldManager: FieldManager;
@@ -12,14 +13,16 @@ export class RichTextFieldHandler implements FieldHandler {
     moduleName: string,
     modelName: string,
     field: string,
-    modelEnableSoftDelete: any
+    modelEnableSoftDelete: any,
+    dataSourceType?: SupportedDatabases
   ) {
     this.entityFieldManager = new RichTextFieldManagerForEntity(
       tree,
       moduleName,
       modelName,
       field,
-      modelEnableSoftDelete
+      modelEnableSoftDelete,
+      dataSourceType
     );
     this.createDtoFieldManager = new RichTextFieldManagerForDto(
       tree,

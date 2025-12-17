@@ -12,6 +12,7 @@ import {
   ReplaceChangeSSS,
   getFieldHandler,
 } from '../field/FieldManager';
+import { SupportedDatabases } from '../field/db-helpers';
 
 export const SOLID_CORE_MODULE_NAME = 'solid-core';
 export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidstarters/solid-core';
@@ -346,7 +347,8 @@ export function updateField(tree: Tree, options: any, field: any) {
       options.module,
       options.model,
       field,
-      options.modelEnableSoftDelete
+      options.modelEnableSoftDelete,
+      options.dataSourceType as SupportedDatabases
     );
     const entityFieldChanges = fieldHandler.updateEntityField();
     // console.log('entityFieldChanges:', entityFieldChanges.map((change) => change.changes));
@@ -533,9 +535,9 @@ export function calculateModuleFileImportPath(moduleName: string, internalPath: 
   return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
 }
 
-export function outputParentImportPathForEntity(parentModel: string | null = null, parentModule: string = "solid-core") {
+export function outputEntitySuperClassImport(isLegacyTable: boolean = false, isLegacyTableWithId: boolean = false, parentModel: string | null = null, parentModule: string = "solid-core") {
   let importPath: string = SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
-  let importSymbol: string = "CommonEntity";
+  let importSymbol: string = isLegacyTableWithId ? "LegacyCommonWithIdEntity" : isLegacyTable ? "LegacyCommonEntity" : "CommonEntity";
   if (parentModel != null) {
     importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`;
     importSymbol = `${classify(parentModel)}`;
