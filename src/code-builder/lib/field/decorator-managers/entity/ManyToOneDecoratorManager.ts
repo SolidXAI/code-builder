@@ -68,7 +68,7 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
         //TODO probably this too can be done in a lesser intrusive way i.e update everything instead of removing and adding
         newModifiers = [...this.filterNonDecorators(existingModifiers), ...this.filterOtherDecorators(this.decoratorName(), existingModifiers)];
         //Add the many-to-one decorator if it is required  
-        const changes: Change[] = [];  
+        const changes: Change[] = [];
         if (this.isApplyDecorator()) {
             newModifiers = [...newModifiers, this.createRelationDecorator(existingDecorator)];
             changes.push(...this.decoratorImports());
@@ -116,7 +116,7 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
         }
         return options;
     }
-    
+
     private createRelationDecorator(existingRelationDecorator: ts.Decorator | undefined): ts.Decorator {
         // console.log('createRelationDecorator called with ....', existingRelationDecorator?.getText());
         // Capture the existing relation decorator options
@@ -156,16 +156,18 @@ export class ManyToOneDecoratorManager implements DecoratorManager {
     }
     private createRelationDecoratorOptions(): Map<string, ts.PropertyAssignment | null> {
         const options: any = new Map<string, ts.Expression>();
-        const cascade = this.options.relationCascade.toUpperCase();
-        const onDeleteType: DeleteType = cascade as DeleteType;
-        options.set('onDelete', ts.factory.createStringLiteral(onDeleteType));
+        if (!_.isEmpty(this.options.relationCascade)) {
+            const cascade = this.options.relationCascade.toUpperCase();
+            const onDeleteType: DeleteType = cascade as DeleteType;
+            options.set('onDelete', ts.factory.createStringLiteral(onDeleteType));
+        }
         if (!this.options.required) {
             options.set('nullable', ts.factory.createTrue());
         }
         else {
             options.set('nullable', ts.factory.createFalse());
         }
-        
+
         return this.optionsToPropertyAssignmentsOrNull(options);
     }
     private optionsToPropertyAssignmentsOrNull(options: Map<string, ts.Expression | null>): Map<string, ts.PropertyAssignment | null> {
