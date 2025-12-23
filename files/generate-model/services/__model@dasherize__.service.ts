@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager } from '@nestjs/typeorm';
 import { DiscoveryService, ModuleRef  } from "@nestjs/core";
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 
 import { CRUDService } from '<%= calculateModuleFileImportPath(module,"src/services/crud.service") %>';
 import { ModelMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/model-metadata.service") %>';

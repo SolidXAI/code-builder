@@ -535,11 +535,11 @@ export function calculateModuleFileImportPath(moduleName: string, internalPath: 
   return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
 }
 
-export function outputEntitySuperClassImport(isLegacyTable: boolean = false, isLegacyTableWithId: boolean = false, parentModel: string | null = null, parentModule: string = "solid-core") {
-  let importPath: string = SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
+export function outputEntitySuperClassImport(module: string, isLegacyTable: boolean = false, isLegacyTableWithId: boolean = false, parentModel: string | null = null, parentModule: string = "solid-core") {
+  let importPath: string = isLegacyTableWithId ? calculateModuleFileImportPath(module, `src/common/entities/legacy-common-with-id.entity.ts`) : isLegacyTable ? calculateModuleFileImportPath(module, `src/common/entities/legacy-common.entity.ts`) : calculateModuleFileImportPath(module, `src/common/entities/common.entity.ts`);
   let importSymbol: string = isLegacyTableWithId ? "LegacyCommonWithIdEntity" : isLegacyTable ? "LegacyCommonEntity" : "CommonEntity";
   if (parentModel != null) {
-    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`;
+    importPath = calculateModuleFileImportPath(parentModule, `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`);
     importSymbol = `${classify(parentModel)}`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;

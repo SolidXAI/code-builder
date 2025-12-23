@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { RequestContextService, SecurityRuleRepository, SolidBaseRepository } from '@solidstarters/solid-core';
+import { SecurityRuleRepository } from '<%= calculateModuleFileImportPath(module,"src/repository/security-rule.repository") %>';
+import { SolidBaseRepository } from '<%= calculateModuleFileImportPath(module,"src/repository/solid-base.repository") %>' ;
+import { RequestContextService } from '<%= calculateModuleFileImportPath(module,"src/services/request-context.service") %>';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { <%= classify(model) %> } from '../entities/<%= dasherize(model) %>.entity';
