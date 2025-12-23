@@ -536,7 +536,7 @@ export function calculateModuleFileImportPath(moduleName: string, internalPath: 
 }
 
 export function outputEntitySuperClassImport(module: string, isLegacyTable: boolean = false, isLegacyTableWithId: boolean = false, parentModel: string | null = null, parentModule: string = "solid-core") {
-  let importPath: string = isLegacyTableWithId ? calculateModuleFileImportPath(module, `src/common/entities/legacy-common-with-id.entity.ts`) : isLegacyTable ? calculateModuleFileImportPath(module, `src/common/entities/legacy-common.entity.ts`) : calculateModuleFileImportPath(module, `src/common/entities/common.entity.ts`);
+  let importPath: string = isLegacyTableWithId ? calculateModuleFileImportPath(module, `src/entities/legacy-common-with-id.entity.ts`) : isLegacyTable ? calculateModuleFileImportPath(module, `src/entities/legacy-common.entity.ts`) : calculateModuleFileImportPath(module, `src/entities/common.entity.ts`);
   let importSymbol: string = isLegacyTableWithId ? "LegacyCommonWithIdEntity" : isLegacyTable ? "LegacyCommonEntity" : "CommonEntity";
   if (parentModel != null) {
     importPath = calculateModuleFileImportPath(parentModule, `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity.ts`);
