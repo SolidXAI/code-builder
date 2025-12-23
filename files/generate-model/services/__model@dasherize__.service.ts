@@ -22,7 +22,7 @@ export class <%= classify(model) %>Service extends CRUDService<<%= classify(mode
     readonly fileService: FileService,
     readonly discoveryService: DiscoveryService,
     readonly crudHelperService: CrudHelperService,
-    @InjectEntityManager()
+    @InjectEntityManager("<%= dataSource %>")
     readonly entityManager: EntityManager,
     readonly repo: <%= classify(model) %>Repository,
     readonly moduleRef: ModuleRef
