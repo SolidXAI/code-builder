@@ -1,4 +1,4 @@
-<%= outputEntitySuperClassImport(isLegacyTable, isLegacyTableWithId, parentModel, parentModule) %>
+<%= outputEntitySuperClassImport(module, isLegacyTable, isLegacyTableWithId, parentModel, parentModule) %>
 import { <%= parentModel ? `ChildEntity` : `Entity` %> } from 'typeorm'
 
 <%= parentModel ? `@ChildEntity()` : `@Entity(${table ? `'${table}'` : ''})` %>
