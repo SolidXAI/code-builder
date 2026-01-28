@@ -1,33 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { DiscoveryService, ModuleRef  } from "@nestjs/core";
+import { ModuleRef  } from "@nestjs/core";
 import { EntityManager } from 'typeorm';
-
 import { CRUDService } from '<%= calculateModuleFileImportPath(module,"src/services/crud.service") %>';
-import { ModelMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/model-metadata.service") %>';
-import { ModuleMetadataService } from '<%= calculateModuleFileImportPath(module,"src/services/module-metadata.service") %>';
-import { ConfigService } from '@nestjs/config';
-import { FileService } from '<%= calculateModuleFileImportPath(module,"src/services/file.service") %>';
-import { CrudHelperService } from '<%= calculateModuleFileImportPath(module,"src/services/crud-helper.service") %>';
-
 import { <%= classify(model) %> } from '../entities/<%= dasherize(model) %>.entity';
 import { <%= classify(model) %>Repository } from '../repositories/<%= dasherize(model) %>.repository';
 
 @Injectable()
 export class <%= classify(model) %>Service extends CRUDService<<%= classify(model) %>>{
   constructor(
-    readonly modelMetadataService: ModelMetadataService,
-    readonly moduleMetadataService: ModuleMetadataService,
-    readonly configService: ConfigService,
-    readonly fileService: FileService,
-    readonly discoveryService: DiscoveryService,
-    readonly crudHelperService: CrudHelperService,
     @InjectEntityManager("<%= dataSource %>")
     readonly entityManager: EntityManager,
     readonly repo: <%= classify(model) %>Repository,
-    readonly moduleRef: ModuleRef
-
+    readonly moduleRef: ModuleRef,
+    <% if (dataSource !== 'default') { %>
+    readonly defaultDatasourceEntityManager: EntityManager,
+    <% } %>  
  ) {
-   super(modelMetadataService, moduleMetadataService,  configService, fileService,  discoveryService, crudHelperService,entityManager, repo, '<%= model %>', '<%= module %>', moduleRef);
+   super(entityManager, repo, '<%= model %>', '<%= module %>', moduleRef);
  }
 }
