@@ -564,3 +564,41 @@ export function outputParentImportPathForDto(parentModel: string | null = null, 
 export function unSnakeCase(name: string) {
   return name.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
 }
+
+export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string): any {
+  const metadataFilePath = getModuleMetadataFilePath(moduleName);
+  if (!tree.exists(metadataFilePath)) {
+    throw new Error(`Module metadata file not found at ${metadataFilePath}`);
+  }
+
+  const metadataJson = JSON.parse(tree.readText(metadataFilePath));
+  const moduleMetadata = metadataJson.moduleMetadata;
+  if (!moduleMetadata || !moduleMetadata.models) {
+    throw new Error(`Invalid metadata structure in ${metadataFilePath}: missing moduleMetadata.models`);
+  }
+
+  const model = moduleMetadata.models.find((m: any) => m.singularName === modelName);
+  if (!model) {
+    throw new Error(`Model '${modelName}' not found in module '${moduleName}' metadata. Available models: ${moduleMetadata.models.map((m: any) => m.singularName).join(', ')}`);
+  }
+
+  const options: any = {
+    module: moduleName,
+    model: modelName,
+    table: model.tableName,
+    moduleDisplayName: moduleMetadata.displayName,
+    dataSource: model.dataSource,
+    dataSourceType: model.dataSourceType,
+    modelEnableSoftDelete: model.enableSoftDelete,
+    draftPublishWorkflowEnabled: model.draftPublishWorkflow,
+    isLegacyTable: model.isLegacyTable ?? false,
+    isLegacyTableWithId: model.isLegacyTableWithId ?? false,
+    fields: model.fields.map((f: any) => JSON.stringify(f)),
+  };
+
+  if (model.isChild && model.parentModelUserKey) {
+    options.parentModel = model.parentModelUserKey;
+  }
+
+  return options;
+}
