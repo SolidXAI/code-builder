@@ -14,7 +14,7 @@ import {
   url,
 } from '@angular-devkit/schematics';
 import * as generateModelHelpers from './lib/model/helpers';
-import { addField, SOLID_CORE_MODULE_NAME, readModelOptionsFromMetadata } from './lib/model/helpers';
+import { addField, SOLID_CORE_MODULE_NAME, readModelOptionsFromMetadata, readFieldOptionsFromMetadata } from './lib/model/helpers';
 import { removeField } from './lib/model/helpers';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { strings } from '@angular-devkit/core';
@@ -118,6 +118,13 @@ function updateFields(options: any): Rule {
 
 export function removeFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
+    // Resolve field names to full field definitions from metadata
+    const fieldNames = Array.isArray(options.fieldNames) ? options.fieldNames : [options.fieldNames];
+    const metadataResult = readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames);
+    options.fields = metadataResult.fields;
+    options.modelEnableSoftDelete = metadataResult.modelEnableSoftDelete;
+    options.dataSourceType = metadataResult.dataSourceType;
+
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
     fields.forEach((field: any) => {

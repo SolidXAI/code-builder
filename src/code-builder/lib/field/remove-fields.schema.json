@@ -8,28 +8,23 @@
       "type": "string",
       "description": "The name of the existing model"
     },
-    "fields": {
+    "fieldNames": {
       "oneOf": [
         {
           "type": "array",
           "items": {
             "type": "string",
-            "description": "JSON stringfied Metadata about a field"
+            "description": "Name of a field to remove"
           },
-          "description": "An array of field metadata"
+          "description": "An array of field names to remove"
         },
         {
           "type": "string",
-          "description": "JSON stringfied Metadata about a field"
+          "description": "Name of a field to remove"
         }
       ],
-      "description": "The field metadata for fields for the model"
-    },
-    "generateChecksum": {
-      "type": "boolean",
-      "description": "Whether to generate a checksum for the module",
-      "default": false
+      "description": "The field name(s) to remove from the model"
     }
   },
-  "required": ["module", "model"]
+  "required": ["module", "model", "fieldNames"]
 }

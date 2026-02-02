@@ -602,3 +602,42 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
 
   return options;
 }
+
+export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string, fieldNames: string[]): { fields: string[], modelEnableSoftDelete: boolean, dataSourceType: string } {
+  const metadataFilePath = getModuleMetadataFilePath(moduleName);
+  if (!tree.exists(metadataFilePath)) {
+    throw new Error(`Module metadata file not found at ${metadataFilePath}`);
+  }
+
+  const metadataJson = JSON.parse(tree.readText(metadataFilePath));
+  const moduleMetadata = metadataJson.moduleMetadata;
+  if (!moduleMetadata || !moduleMetadata.models) {
+    throw new Error(`Invalid metadata structure in ${metadataFilePath}: missing moduleMetadata.models`);
+  }
+
+  const model = moduleMetadata.models.find((m: any) => m.singularName === modelName);
+  if (!model) {
+    throw new Error(`Model '${modelName}' not found in module '${moduleName}' metadata. Available models: ${moduleMetadata.models.map((m: any) => m.singularName).join(', ')}`);
+  }
+
+  const matchedFields: any[] = [];
+  const notFound: string[] = [];
+  for (const name of fieldNames) {
+    const field = model.fields.find((f: any) => f.name === name);
+    if (field) {
+      matchedFields.push(field);
+    } else {
+      notFound.push(name);
+    }
+  }
+
+  if (notFound.length > 0) {
+    throw new Error(`Field(s) not found in model '${modelName}': ${notFound.join(', ')}. Available fields: ${model.fields.map((f: any) => f.name).join(', ')}`);
+  }
+
+  return {
+    fields: matchedFields.map((f: any) => JSON.stringify(f)),
+    modelEnableSoftDelete: model.enableSoftDelete ?? false,
+    dataSourceType: model.dataSourceType,
+  };
+}
