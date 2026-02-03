@@ -170,7 +170,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
 
     const classNode = this.getClassNode(modelName, this.options, source);
 
-    const fieldDefinition = `\n${fieldSourceLines.reverse().join('\n')}\n`;
+    const fieldDefinition = `\n${fieldSourceLines.reverse().join('\n')}\n\n`;
     changes.push(
       new InsertChange(
         source.fileName,
@@ -447,12 +447,18 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
       omitTrailingSemicolon: false,
     });
 
-    const updatedPropertyDeclarationNodeText = printer.printNode(
+    let text = printer.printNode(
       ts.EmitHint.Unspecified,
       updatedPropertyDeclarationNode,
       nodeSource
     );
-    return updatedPropertyDeclarationNodeText;
+
+    // Add blank line between class members (after each field block)
+    if (ts.isClassDeclaration(updatedPropertyDeclarationNode)) {
+      text = text.replace(/;\n(\s*@|\s*\w)/g, ';\n\n$1');
+    }
+
+    return text;
   }
 
   protected isAdditionalFieldRequired(): boolean {
