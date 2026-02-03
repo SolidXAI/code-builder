@@ -119,7 +119,7 @@ function updateFields(options: any): Rule {
 export function removeFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     // Resolve field names to full field definitions from metadata
-    const fieldNames = Array.isArray(options.fieldNames) ? options.fieldNames : [options.fieldNames];
+    const fieldNames = Array.isArray(options.fieldNamesForRemoval) ? options.fieldNamesForRemoval : [options.fieldNamesForRemoval];
     const metadataResult = readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames);
     options.fields = metadataResult.fields;
     options.modelEnableSoftDelete = metadataResult.modelEnableSoftDelete;
