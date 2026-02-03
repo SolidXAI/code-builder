@@ -14,7 +14,7 @@ import {
   url,
 } from '@angular-devkit/schematics';
 import * as generateModelHelpers from './lib/model/helpers';
-import { addField, SOLID_CORE_MODULE_NAME } from './lib/model/helpers';
+import { addField, SOLID_CORE_MODULE_NAME, readModelOptionsFromMetadata, readFieldOptionsFromMetadata } from './lib/model/helpers';
 import { removeField } from './lib/model/helpers';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { strings } from '@angular-devkit/core';
@@ -43,17 +43,16 @@ export function addModule(options: any): Rule {
     return branchAndMerge(
       chain([
         mergeWith(sourceTemplates, MergeStrategy.Overwrite),
-        updateChecksum(options?.module, options?.generateChecksum, ...generateModelHelpers.getSourceFilePathsAffected(generateModelHelpers.Command.AddModule, options)),
     ]))(_tree, _context);
   };
 }
 
 export function refreshModel(options: any): Rule {
-  //Handle the isLegacyTable option and parse it to boolean
-  options.isLegacyTable = options.isLegacyTable === 'true' ? true : false;
-  options.isLegacyTableWithId = options.isLegacyTableWithId === 'true' ? true : false;
-
   return (tree: Tree, _context: SchematicContext) => {
+    // Read all options from the module metadata file
+    const metadataOptions = readModelOptionsFromMetadata(tree, options.module, options.model);
+    Object.assign(options, metadataOptions);
+
     const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
 
     // If the model related code is not present, then add it by call addModel, else call update field with the fields provided
@@ -81,9 +80,7 @@ function addModel(options: any): Rule {
       chain([
         addModuleImportsAndMetadata(options),
         mergeWith(sourceTemplates, MergeStrategy.Overwrite),
-        updateChecksum(options?.module, options?.generateChecksum, ...generateModelHelpers.getSourceFilePathsAffected(generateModelHelpers.Command.AddModel, options)),
         addFields(options),
-        // removeFields(options),
       ]),
     )(tree, context);
   };
@@ -112,7 +109,6 @@ function updateFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
-    options?.generateChecksum ? generateModelHelpers.takeBackupIfChecksumsMismatch(tree, options.module) : "no-ops";
     fields.forEach((field: any) => {
       generateModelHelpers.updateField(tree, options, field);
     });
@@ -122,10 +118,15 @@ function updateFields(options: any): Rule {
 
 export function removeFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
+    // Resolve field names to full field definitions from metadata
+    const fieldNames = Array.isArray(options.fieldNamesForRemoval) ? options.fieldNamesForRemoval : [options.fieldNamesForRemoval];
+    const metadataResult = readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames);
+    options.fields = metadataResult.fields;
+    options.modelEnableSoftDelete = metadataResult.modelEnableSoftDelete;
+    options.dataSourceType = metadataResult.dataSourceType;
+
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
-    options?.generateChecksum ? generateModelHelpers.takeBackupIfChecksumsMismatch(tree, options.module) : "no-ops";
-
     fields.forEach((field: any) => {
       removeField(tree, options, field);
     });
@@ -213,12 +214,5 @@ function showTree(sourceNode: ts.SourceFile){
   printAllChildren(sourceNode, 0);
 }
 
-function updateChecksum(moduleName: string, generateChecksum: boolean = false, ...filePaths: string[]): Rule {
-  return (tree: Tree, _context: SchematicContext) => {
-    if (!generateChecksum) {
-      return tree;
-    }
-    return generateModelHelpers.handleUpdateChecksums(tree, moduleName, ...filePaths);
-  };
-}
+
 
