@@ -1,6 +1,6 @@
 {
   "name": "@solidxai/code-builder",
-  "version": "0.0.2",
+  "version": "0.0.3-alpha.0",
   "description": "This package is use to generate code for the @solidxai projects",
   "private": false,
   "publishConfig": {
