@@ -1,7 +1,7 @@
 {
-  "name": "@solidstarters/solid-code-builder",
+  "name": "@solidxai/solid-code-builder",
   "version": "1.0.39",
-  "description": "This package is use to generate code for the @solidstarters projects",
+  "description": "This package is use to generate code for the @solidxai projects",
   "private": false,
   "publishConfig": {
     "access": "public"

@@ -3,7 +3,7 @@ import { IsInt,IsOptional } from 'class-validator';
 import { IsDate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { datetimeTransformer } from '@solidstarters/solid-core';
+import { datetimeTransformer } from '@solidxai/solid-core';
 <% } %>
 <%= outputParentImportPathForDto(parentModel ,parentModule ,"update") %>
 export class Update<%= classify(model) %>Dto<%= parentModel ? ` extends Update${classify(parentModel)}Dto` : `` %> {
