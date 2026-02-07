@@ -594,10 +594,13 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
     isLegacyTable: model.isLegacyTable ?? false,
     isLegacyTableWithId: model.isLegacyTableWithId ?? false,
     fields: model.fields.map((f: any) => JSON.stringify(f)),
+    parentModel: null,
+    parentModule: null,
   };
 
   if (model.isChild && model.parentModelUserKey) {
     options.parentModel = model.parentModelUserKey;
+    options.parentModule = model.parentModule ?? null;
   }
 
   return options;
