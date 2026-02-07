@@ -1,6 +1,6 @@
 {
   "name": "@solidxai/code-builder",
-  "version": "0.0.3-alpha.0",
+  "version": "0.1.0",
   "description": "This package is use to generate code for the @solidxai projects",
   "private": false,
   "publishConfig": {
@@ -12,10 +12,7 @@
     "test": "npm run build && jasmine src/**/*_spec.js",
     "postbuild": "copyfiles './files/**/*' dist/",
     "clean": "rimraf dist",
-    "prepare": "npm run build",
-    "publish:patch": "node publish.js patch",
-    "publish:minor": "node publish.js minor",
-    "publish:major": "node publish.js major"
+    "prepare": "npm run build"
   },
   "keywords": [
     "schematics"
