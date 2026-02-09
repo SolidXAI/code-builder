@@ -3,7 +3,7 @@
 import { IsOptional, IsDate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { datetimeTransformer } from '@solidxai/solid-core';
+import { datetimeTransformer } from '@solidxai/core';
 <% } %>
 export class Create<%= classify(model) %>Dto<%= parentModel ? ` extends Create${classify(parentModel)}Dto` : `` %> {
 <% if (draftPublishWorkflowEnabled === 'true') { %>
