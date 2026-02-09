@@ -15,7 +15,7 @@ import {
 import { SupportedDatabases } from '../field/db-helpers';
 
 export const SOLID_CORE_MODULE_NAME = 'solid-core';
-export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidxai/solid-core';
+export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidxai/core';
 
 
 // export const CHECKSUM_FILE_PATH = 'code-builder/output/checksums.json';
