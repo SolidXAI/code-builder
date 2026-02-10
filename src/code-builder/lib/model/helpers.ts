@@ -535,17 +535,21 @@ export function calculateModuleFileImportPath(moduleName: string, internalPath: 
   return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
 }
 
+export function calculateParentModuleFileImportPath(moduleName: string, internalPath: string) {
+  return (moduleName === SOLID_CORE_MODULE_NAME) ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME  : internalPath;
+}
+
 export function outputEntitySuperClassImport(module: string, isLegacyTable: boolean = false, isLegacyTableWithId: boolean = false, parentModel: string | null = null, parentModule: string = "solid-core") {
-  let importPath: string = isLegacyTableWithId ? calculateModuleFileImportPath(module, `src/entities/legacy-common-with-id.entity`) : isLegacyTable ? calculateModuleFileImportPath(module, `src/entities/legacy-common.entity`) : calculateModuleFileImportPath(module, `src/entities/common.entity`);
+  let importPath: string = isLegacyTableWithId ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : isLegacyTable ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : calculateModuleFileImportPath(module, `src/entities/common.entity`);
   let importSymbol: string = isLegacyTableWithId ? "LegacyCommonWithIdEntity" : isLegacyTable ? "LegacyCommonEntity" : "CommonEntity";
   if (parentModel != null) {
-    importPath = calculateModuleFileImportPath(parentModule, `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity`);
+    importPath = calculateParentModuleFileImportPath(parentModule, `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity`);
     importSymbol = `${classify(parentModel)}`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
 }
 
-export function outputParentImportPathForDto(parentModel: string | null = null, parentModule: string | null = null, context: string) {
+export function outputParentImportPathForDto(parentModel: string | null = null, parentModule: string | null = 'solid-core', context: string) {
   if (parentModel == null || parentModule == null) {
     return "";
   }
@@ -600,7 +604,7 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
 
   if (model.isChild && model.parentModelUserKey) {
     options.parentModel = model.parentModelUserKey;
-    options.parentModule = model.parentModule ?? null;
+    options.parentModule = model.parentModule ?? 'solid-core';
   }
 
   return options;
