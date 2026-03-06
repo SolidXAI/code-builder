@@ -192,7 +192,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     // const classNode = findNodes(source, ts.SyntaxKind.ClassDeclaration)[0];
     const classNode = this.getClassNode(modelName, source);
 
-    const fieldDefinition = `\n${fieldSourceLines.reverse().join('\n')}\n`;
+    const fieldDefinition = `\n\n${fieldSourceLines.reverse().join('\n')}\n`;
     changes.push(
       new InsertChange(
         source.fileName,
@@ -410,11 +410,17 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       omitTrailingSemicolon: false,
     });
 
-    const updatedPropertyDeclarationNodeText = printer.printNode(
+    let updatedPropertyDeclarationNodeText = printer.printNode(
       ts.EmitHint.Unspecified,
       updatedPropertyDeclarationNode,
       nodeSource
     );
+
+    // Add blank lines between class members when printing a full class declaration
+    if (ts.isClassDeclaration(updatedPropertyDeclarationNode)) {
+      updatedPropertyDeclarationNodeText = updatedPropertyDeclarationNodeText.replace(/;\n(\s+\S)/g, ';\n\n$1');
+    }
+
     return updatedPropertyDeclarationNodeText;
   }
 

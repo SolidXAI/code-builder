@@ -170,7 +170,7 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
 
     const classNode = this.getClassNode(modelName, this.options, source);
 
-    const fieldDefinition = `\n${fieldSourceLines.reverse().join('\n')}\n\n`;
+    const fieldDefinition = `\n\n${fieldSourceLines.reverse().join('\n')}\n\n`;
     changes.push(
       new InsertChange(
         source.fileName,
