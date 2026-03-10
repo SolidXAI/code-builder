@@ -5,7 +5,7 @@
 `@solidxai/code-builder` is the schematics-based code generation engine that powers the SolidX platform. When you define a module or model through the SolidX app builder, this package is what runs under the hood — reading your metadata and producing fully-formed, decorator-complete NestJS files ready to run without further editing.
 
 [![npm version](https://img.shields.io/npm/v/@solidxai/code-builder)](https://www.npmjs.com/package/@solidxai/code-builder)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](https://opensource.org/licenses/BSL-1.1)
 [![Documentation](https://img.shields.io/badge/docs-solidxai.com-blue)](https://docs.solidxai.com/docs)
 
 ---
@@ -34,7 +34,7 @@ Module metadata JSON
 
 ## Schematics
 
-The package exposes three schematics, each invoked automatically by the `solidCore` CLI in `@solidxai/core`.
+The package exposes three schematics, each invoked automatically by the `solid` CLI in `@solidxai/core`.
 
 ### `add-module`
 
@@ -45,7 +45,6 @@ Scaffolds the folder structure and boilerplate for a new SolidX module.
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `module` | string | yes | The name of the module to create |
-| `generateChecksum` | boolean | no | Generate a checksum for change tracking |
 
 **What it creates:**
 
@@ -90,7 +89,7 @@ Each file is generated with the correct imports, class decorators, TypeORM colum
 
 ### `remove-fields`
 
-Removes one or more fields from an existing model's entity and both DTOs, cleaning up all associated decorators and imports. This is the inverse of the field-addition path in `refresh-model`.
+Removes one or more fields from an existing model's entity and both DTOs, cleaning up all associated decorators and imports. This is the inverse of the field-addition path in `refresh-model`. This command is invoked under the hood by SolidX when you delete a field from the model builder UI.
 
 **Parameters:**
 
@@ -124,24 +123,13 @@ Each field type has a dedicated handler that manages changes to all three target
 
 ## Installation
 
-This package is consumed automatically by `@solidxai/core` as a dependency — you do not need to install it directly in most cases. It is invoked by the `solidCore refresh-model` and `solidCore refresh-module` CLI commands.
+This package is consumed automatically by `@solidxai/core` as a dependency — you do not need to install it directly in most cases. It is invoked by the `solid refresh-model` and `solid refresh-module` CLI commands.
 
 If you need to use it standalone:
 
 ```bash
 npm install @solidxai/code-builder
 ```
-
-To invoke schematics directly via the Angular Schematics CLI:
-
-```bash
-# Install the schematics runner
-npm install -g @angular-devkit/schematics-cli
-
-# Run a schematic
-schematics @solidxai/code-builder:refresh-model --module=inventory --model=product
-```
-
 ---
 
 ## Tech stack
@@ -149,7 +137,6 @@ schematics @solidxai/code-builder:refresh-model --module=inventory --model=produ
 | Concern | Technology |
 |---|---|
 | Schematic engine | Angular Schematics (`@angular-devkit/schematics`) |
-| AST manipulation | TypeScript Compiler API via `ts-morph` |
 | NestJS integration | `@nestjs/schematics` |
 | Validation | `class-validator` |
 | Build | TypeScript compiler (`tsc`) + `tsc-alias` |
@@ -162,7 +149,7 @@ schematics @solidxai/code-builder:refresh-model --module=inventory --model=produ
 
 | Package | Role |
 |---|---|
-| [`@solidxai/core`](https://www.npmjs.com/package/@solidxai/core) | NestJS backend module; invokes this package via its `solidCore` CLI |
+| [`@solidxai/core`](https://www.npmjs.com/package/@solidxai/core) | NestJS backend module; invokes this package via its `solid` CLI |
 | [`@solidxai/core-ui`](https://www.npmjs.com/package/@solidxai/core-ui) | React admin panel that drives the visual model builder |
 | `@solidxai/code-builder` | Code generation engine (this package) |
 
@@ -178,4 +165,4 @@ When a developer uses the SolidX app builder to define a new model or add a fiel
 
 ## License
 
-MIT © [Logicloop](https://logicloop.io)
+BSL-1.1 © [Logicloop](https://logicloop.io)
