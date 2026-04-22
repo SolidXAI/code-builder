@@ -6,6 +6,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@solidstarters/solid-code-builder)](https://www.npmjs.com/package/@solidstarters/solid-code-builder)
 [![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](https://mariadb.com/bsl11/)
+[![Discord](https://img.shields.io/badge/discord-online-brightgreen.svg)](https://discord.gg/yh4KZf8c)
 
 ---
 
