@@ -1,28 +1,25 @@
-# Getting Started With Schematics
+# @solidstarters/solid-code-builder
 
-This repository is a basic Schematic implementation that serves as a starting point to create and publish Schematics to NPM.
+> The code generation engine behind SolidX — transforms metadata definitions into production-ready NestJS boilerplate.
 
-### Testing
+`@solidstarters/solid-code-builder` is the AST-level code generation tool used by the SolidX platform. It reads module and model metadata and produces NestJS entities, services, controllers, repositories, and DTOs — preserving custom logic across regeneration cycles.
 
-To test locally, install `@angular-devkit/schematics-cli` globally and use the `schematics` command line tool. That tool acts the same as the `generate` command of the Angular CLI, but also has a debug mode.
+[![npm version](https://img.shields.io/npm/v/@solidstarters/solid-code-builder)](https://www.npmjs.com/package/@solidstarters/solid-code-builder)
+[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](https://mariadb.com/bsl11/)
 
-Check the documentation with
+---
 
-```bash
-schematics --help
-```
+## Part of the SolidX Platform
 
-### Unit Testing
+| | |
+|---|---|
+| Website | [solidxai.com](https://solidxai.com) |
+| Documentation | [docs.solidxai.com](https://docs.solidxai.com/docs) |
+| Discord | [discord.gg/yh4KZf8c](https://discord.gg/yh4KZf8c) |
+| Support | support@solidxai.com |
 
-`npm run test` will run the unit tests, using Jasmine as a runner and test framework.
+---
 
-### Publishing
+## License
 
-To publish, simply do:
-
-```bash
-npm run build
-npm publish
-```
-
-That's it!
+BSL-1.1 © [Logicloop](https://logicloop.io)
