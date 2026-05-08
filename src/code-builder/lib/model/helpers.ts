@@ -1,4 +1,5 @@
-import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
+import { kebabCase } from 'lodash';
+import { classify } from '../string.utils';
 import { Tree } from '@angular-devkit/schematics';
 import { MetadataManager } from '@nestjs/schematics';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
@@ -16,7 +17,6 @@ import { SupportedDatabases } from '../field/db-helpers';
 
 export const SOLID_CORE_MODULE_NAME = 'solid-core';
 export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidxai/core';
-
 
 // export const CHECKSUM_FILE_PATH = 'code-builder/output/checksums.json';
 export const CHECKSUM_HASH_ALGORITHM = 'md5';
@@ -95,27 +95,27 @@ export function getSolidImports(
     case SolidProviderType.Dto:
       return {
         symbolName: `Create${classify(modelName)}Dto`,
-        importPath: `./dtos/create-${dasherize(modelName)}.dto`,
+        importPath: `./dtos/create-${kebabCase(modelName)}.dto`,
       };
     case SolidProviderType.Service:
       return {
         symbolName: `${classify(modelName)}Service`,
-        importPath: `./services/${dasherize(modelName)}.service`,
+        importPath: `./services/${kebabCase(modelName)}.service`,
       };
     case SolidProviderType.Controller:
       return {
         symbolName: `${classify(modelName)}Controller`,
-        importPath: `./controllers/${dasherize(modelName)}.controller`,
+        importPath: `./controllers/${kebabCase(modelName)}.controller`,
       };
     case SolidProviderType.Entity:
       return {
         symbolName: `${classify(modelName)}`,
-        importPath: `./entities/${dasherize(modelName)}.entity`,
+        importPath: `./entities/${kebabCase(modelName)}.entity`,
       };
       case SolidProviderType.Repository:
         return {
           symbolName: `${classify(modelName)}Repository`,
-          importPath: `./repositories/${dasherize(modelName)}.repository`,
+          importPath: `./repositories/${kebabCase(modelName)}.repository`,
         };
     default:
       throw Error('Invalid SolidProviderType');
@@ -251,7 +251,7 @@ function getModuleMetadataFilePath(moduleName: string) {
     return `src/${moduleName}/seeders/seed-data/${moduleName}-metadata.json`
   }
   else {
-    return `module-metadata/${dasherize(moduleName)}/${dasherize(moduleName)}-metadata.json`;
+    return `module-metadata/${kebabCase(moduleName)}/${kebabCase(moduleName)}-metadata.json`;
   }
 }
 
@@ -261,7 +261,6 @@ function getModuleMetadataFilePath(moduleName: string) {
 //   }
 //   return checksums.filter((checksum: Checksum) => checksum.filePath === filePath).pop();
 // }
-
 
 function applyChanges(tree: Tree, filePath: string, changes: Change[]) {
   /*
@@ -416,15 +415,15 @@ export function getSourceFilePathsAffected(command: Command, options: any): stri
   const sourceFilePaths: string[] = [];
   switch (command) {
     case Command.AddModule:
-      sourceFilePaths.push(`src/${dasherize(options.module)}/${dasherize(options.module)}.module.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/${kebabCase(options.module)}.module.ts`);
       break;
     case Command.AddModel:
-      sourceFilePaths.push(`src/${dasherize(options.module)}/${dasherize(options.module)}.module.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/services/${dasherize(options.model)}.service.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/controllers/${dasherize(options.model)}.controller.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/entities/${dasherize(options.model)}.entity.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/dtos/create-${dasherize(options.model)}.dto.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/dtos/update-${dasherize(options.model)}.dto.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/${kebabCase(options.module)}.module.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/services/${kebabCase(options.model)}.service.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/controllers/${kebabCase(options.model)}.controller.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/entities/${kebabCase(options.model)}.entity.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/dtos/create-${kebabCase(options.model)}.dto.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/dtos/update-${kebabCase(options.model)}.dto.ts`);
       break;
     default:
       throw Error('Invalid command');
@@ -543,7 +542,7 @@ export function outputEntitySuperClassImport(module: string, isLegacyTable: bool
   let importPath: string = isLegacyTableWithId ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : isLegacyTable ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : calculateModuleFileImportPath(module, `src/entities/common.entity`);
   let importSymbol: string = isLegacyTableWithId ? "LegacyCommonWithIdEntity" : isLegacyTable ? "LegacyCommonEntity" : "CommonEntity";
   if (parentModel != null) {
-    importPath = calculateParentModuleFileImportPath(parentModule, `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity`);
+    importPath = calculateParentModuleFileImportPath(parentModule, `src/${kebabCase(parentModule)}/entities/${kebabCase(parentModel)}.entity`);
     importSymbol = `${classify(parentModel)}`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
@@ -556,10 +555,10 @@ export function outputParentImportPathForDto(parentModel: string | null = null, 
   let importPath = ``;
   let importSymbol = ``;
   if (context === DtoSourceType.Update) {
-    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/dtos/update-${dasherize(parentModel)}.dto.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${kebabCase(parentModule)}/dtos/update-${kebabCase(parentModel)}.dto.ts`;
     importSymbol = `Update${classify(parentModel)}Dto`;
   } else if (context === DtoSourceType.Create) {
-    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/dtos/create-${dasherize(parentModel)}.dto.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${kebabCase(parentModule)}/dtos/create-${kebabCase(parentModel)}.dto.ts`;
     importSymbol = `Create${classify(parentModel)}Dto`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
