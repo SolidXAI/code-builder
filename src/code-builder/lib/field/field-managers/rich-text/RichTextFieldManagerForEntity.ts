@@ -23,39 +23,39 @@ export class RichTextFieldManagerForEntity
 
   protected override additionalColumnDecoratorOptions(): Map<string, any> {
     const options = new Map<string, any>();
-    if (this.field.max) {
-      options.set('length', transformColumnOptionForDatabase(
-        'length',
-        this.field.max,
-        this.field.ormType,
-        this.dataSourceType,
-      )
-      );
-    }
+    // if (this.field.max) {
+    //   options.set('length', transformColumnOptionForDatabase(
+    //     'length',
+    //     this.field.max,
+    //     this.field.ormType,
+    //     this.dataSourceType,
+    //   )
+    //   );
+    // }
     options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.value ?? null);
     return options;
   }
 
   protected override additionalColumnDecoratorOptionExpressions(): Map<string, ts.Expression | null> {
     const options = new Map<string, ts.Expression | null>();
-    if (this.field.max) {
-      const lengthValue = transformColumnOptionForDatabase(
-        'length',
-        this.field.max,
-        this.field.ormType,
-        this.dataSourceType,
-      );
+    // if (this.field.max) {
+    //   const lengthValue = transformColumnOptionForDatabase(
+    //     'length',
+    //     this.field.max,
+    //     this.field.ormType,
+    //     this.dataSourceType,
+    //   );
 
-      if (typeof lengthValue === 'number') {
-        options.set('length', ts.factory.createNumericLiteral(lengthValue));
-      } else if (typeof lengthValue === 'string') {
-        options.set('length', ts.factory.createStringLiteral(lengthValue));
-      } else {
-        options.set('length', null);
-      }
-    } else {
-      options.set('length', null);
-    }
+    //   if (typeof lengthValue === 'number') {
+    //     options.set('length', ts.factory.createNumericLiteral(lengthValue));
+    //   } else if (typeof lengthValue === 'string') {
+    //     options.set('length', ts.factory.createStringLiteral(lengthValue));
+    //   } else {
+    //     options.set('length', null);
+    //   }
+    // } else {
+    //   options.set('length', null);
+    // }
     options.set('default', this.defaultValueInitializer(this.field.defaultValue)?.expression ?? null);
     return options
   }
