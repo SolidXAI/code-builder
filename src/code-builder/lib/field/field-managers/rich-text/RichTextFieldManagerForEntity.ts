@@ -2,7 +2,7 @@ import { Tree } from '@angular-devkit/schematics';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { FieldManager, FieldType } from '../../FieldManager';
 import { BaseFieldManagerForEntity } from '../base/BaseFieldManagerForEntity';
-import { SupportedDatabases, transformColumnOptionForDatabase } from '../../db-helpers';
+import { SupportedDatabases } from '../../db-helpers';
 
 //FIXME Implementation pending
 export class RichTextFieldManagerForEntity
