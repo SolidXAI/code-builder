@@ -1,4 +1,5 @@
-import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
+import { kebabCase } from 'lodash';
+import { classify } from '../../../string.utils';
 import { Tree } from '@angular-devkit/schematics';
 import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { Change } from '@schematics/angular/utility/change';
@@ -270,7 +271,7 @@ export class ManyToManyRelationFieldManagerForDto
     }
 
     relatedFieldImport(): Change {
-        const relatedEntityImportName = `update-${dasherize(this.field.relationCoModelSingularName)}.dto`;
+        const relatedEntityImportName = `update-${kebabCase(this.field.relationCoModelSingularName)}.dto`;
         const relatedEntityPath = this.field.relationModelModuleName ? `src/${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
         return safeInsertImport(this.source, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
         // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath);

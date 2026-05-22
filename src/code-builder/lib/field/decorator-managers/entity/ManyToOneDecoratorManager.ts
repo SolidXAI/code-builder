@@ -1,9 +1,9 @@
-import { classify } from "@angular-devkit/core/src/utils/strings";
 import ts, { ModifierLike, ObjectLiteralElementLike, PropertyDeclaration } from "@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript";
 import { insertImport } from "@schematics/angular/utility/ast-utils";
 import { Change } from "@schematics/angular/utility/change";
 import { DecoratorManager, DeleteType, PartialAddFieldChange } from "../../FieldManager";
 import _ from 'lodash';
+import { classify } from '../../../string.utils';
 interface ManyToOneDecoratorOptions {
     isManyToOne: boolean;
     relationCoModelSingularName: string;

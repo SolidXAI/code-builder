@@ -1,6 +1,6 @@
 {
   "name": "@solidxai/code-builder",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "This package is use to generate code for the @solidxai projects",
   "private": false,
   "publishConfig": {
@@ -18,7 +18,7 @@
     "schematics"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "BUSL-1.1",
   "schematics": "./dist/collection.json",
   "dependencies": {
     "@angular-devkit/core": "^18.0.1",

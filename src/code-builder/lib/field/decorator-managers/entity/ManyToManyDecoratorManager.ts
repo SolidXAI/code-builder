@@ -1,4 +1,5 @@
-import { camelize, classify } from "@angular-devkit/core/src/utils/strings";
+import { camelCase } from 'lodash';
+import { classify } from '../../../string.utils';
 import ts, { ModifierLike, ObjectLiteralElementLike, PropertyDeclaration } from "@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript";
 import { insertImport } from "@schematics/angular/utility/ast-utils";
 import { Change } from "@schematics/angular/utility/change";
@@ -43,7 +44,7 @@ export class ManyToManyDecoratorManager implements DecoratorManager {
 
         const fieldSourceLineComponents: string[] = [];
         fieldSourceLineComponents.push(`() => ${classify(this.options.relationModelName)}`);
-        this.options.relationInverseFieldName ? fieldSourceLineComponents.push(`${camelize(this.options.relationModelName)} => ${camelize(this.options.relationModelName)}.${this.options.relationInverseFieldName}`) : "no-ops";
+        this.options.relationInverseFieldName ? fieldSourceLineComponents.push(`${camelCase(this.options.relationModelName)} => ${camelCase(this.options.relationModelName)}.${this.options.relationInverseFieldName}`) : "no-ops";
         fieldSourceLineComponents.push(`${this.buildRelationOptionsCode()}`);
         fieldSourceLines.push(`@${this.decoratorName()}(${fieldSourceLineComponents.join(', ')})`);
 
@@ -162,7 +163,7 @@ export class ManyToManyDecoratorManager implements DecoratorManager {
                 [ts.factory.createParameterDeclaration(
                     undefined,
                     undefined,
-                    ts.factory.createIdentifier(camelize(this.options.relationModelName)),
+                    ts.factory.createIdentifier(camelCase(this.options.relationModelName)),
                     undefined,
                     undefined,
                     undefined
@@ -170,7 +171,7 @@ export class ManyToManyDecoratorManager implements DecoratorManager {
                 undefined,
                 ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
                 ts.factory.createPropertyAccessExpression(
-                    ts.factory.createIdentifier(camelize(this.options.relationModelName)),
+                    ts.factory.createIdentifier(camelCase(this.options.relationModelName)),
                     ts.factory.createIdentifier(this.options.relationInverseFieldName)
                 )
             );
@@ -218,7 +219,6 @@ export class ManyToManyDecoratorManager implements DecoratorManager {
         });
         return decoratorOptions;
     }
-
 
     private findDecorator(name: string, existingModifiers: ts.NodeArray<ts.ModifierLike> | undefined): ts.Decorator | undefined {
         return existingModifiers ? existingModifiers.filter((m) => (m.kind === ts.SyntaxKind.Decorator)).map(m => m as ts.Decorator).filter(m => this.containsIdentifierName(m, name)).pop() : undefined;
