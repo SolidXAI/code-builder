@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.7] - 2026-06-01
+
+### Fixed
+
+- update module metadata file path for solid-core module
+
 ## [0.1.7] - 2026-05-22
 
 ### Other
