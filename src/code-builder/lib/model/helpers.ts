@@ -248,7 +248,7 @@ export function loadModuleMetadata(tree: Tree, moduleName: string): ModuleMetada
 
 function getModuleMetadataFilePath(moduleName: string) {
   if (moduleName === SOLID_CORE_MODULE_NAME) {
-    return `src/${moduleName}/seeders/seed-data/${moduleName}-metadata.json`
+    return `src/seeders/seed-data/${moduleName}-metadata.json`
   }
   else {
     return `module-metadata/${kebabCase(moduleName)}/${kebabCase(moduleName)}-metadata.json`;
