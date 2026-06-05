@@ -251,7 +251,7 @@ function getModuleMetadataFilePath(moduleName: string) {
     return `src/seeders/seed-data/${moduleName}-metadata.json`
   }
   else {
-    return `module-metadata/${kebabCase(moduleName)}/${kebabCase(moduleName)}-metadata.json`;
+    return `src/${kebabCase(moduleName)}/metadata/${kebabCase(moduleName)}-metadata.json`;
   }
 }
 
