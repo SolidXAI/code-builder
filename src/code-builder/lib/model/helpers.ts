@@ -251,7 +251,7 @@ function getModuleMetadataFilePath(moduleName: string) {
     return `src/seeders/seed-data/${moduleName}-metadata.json`
   }
   else {
-    return `module-metadata/${kebabCase(moduleName)}/${kebabCase(moduleName)}-metadata.json`;
+    return `src/${kebabCase(moduleName)}/metadata/${kebabCase(moduleName)}-metadata.json`;
   }
 }
 
@@ -538,9 +538,9 @@ export function calculateParentModuleFileImportPath(moduleName: string, internal
   return (moduleName === SOLID_CORE_MODULE_NAME) ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME  : internalPath;
 }
 
-export function outputEntitySuperClassImport(module: string, isLegacyTable: boolean = false, isLegacyTableWithId: boolean = false, parentModel: string | null = null, parentModule: string = "solid-core") {
-  let importPath: string = isLegacyTableWithId ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : isLegacyTable ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : calculateModuleFileImportPath(module, `src/entities/common.entity`);
-  let importSymbol: string = isLegacyTableWithId ? "LegacyCommonWithIdEntity" : isLegacyTable ? "LegacyCommonEntity" : "CommonEntity";
+export function outputEntitySuperClassImport(module: string, legacyTableType: string = 'none', parentModel: string | null = null, parentModule: string = "solid-core") {
+  let importPath: string = (legacyTableType !== 'none') ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : calculateModuleFileImportPath(module, `src/entities/common.entity`);
+  let importSymbol: string = legacyTableType === 'generated_id' ? "LegacyCommonEntityWithGeneratedId" : legacyTableType === 'existing_id' ? "LegacyCommonEntityWithExistingId" : "CommonEntity";
   if (parentModel != null) {
     importPath = calculateParentModuleFileImportPath(parentModule, `src/${kebabCase(parentModule)}/entities/${kebabCase(parentModel)}.entity`);
     importSymbol = `${classify(parentModel)}`;
@@ -594,8 +594,7 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
     dataSourceType: model.dataSourceType,
     modelEnableSoftDelete: model.enableSoftDelete,
     draftPublishWorkflowEnabled: model.draftPublishWorkflow,
-    isLegacyTable: model.isLegacyTable ?? false,
-    isLegacyTableWithId: model.isLegacyTableWithId ?? false,
+    legacyTableType: model.legacyTableType ?? 'none',
     fields: model.fields.map((f: any) => JSON.stringify(f)),
     parentModel: null,
     parentModule: null,
