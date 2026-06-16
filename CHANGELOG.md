@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8] - 2026-06-16
+
+### Other
+
+- changes to modify the module metadata file path
+- changes to code builder around legacy table flags cleanup
+
 ## [0.1.7] - 2026-06-01
 
 ### Fixed
