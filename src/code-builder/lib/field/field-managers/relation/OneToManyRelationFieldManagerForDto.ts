@@ -243,7 +243,8 @@ export class OneToManyRelationFieldManagerForDto
 
   relatedFieldImport(): Change {
     const relatedEntityImportName = `update-${kebabCase(this.field.relationCoModelSingularName)}.dto`;
-    const relatedEntityPath = this.field.relationModelModuleName ? `src/${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
+    const isCrossModule = this.field.relationModelModuleName && kebabCase(this.field.relationModelModuleName) !== kebabCase(this.moduleName);
+    const relatedEntityPath = isCrossModule ? `../../${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
     return safeInsertImport(this.source, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
     // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath);
   } //Uncomment this method while implementing many-to-many relation changes
