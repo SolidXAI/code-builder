@@ -531,7 +531,9 @@ export function takeBackupIfChecksumsMismatch(tree: Tree, moduleName: string) {
 }
 
 export function calculateModuleFileImportPath(moduleName: string, internalPath: string) {
-  return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
+  return (moduleName === SOLID_CORE_MODULE_NAME)
+    ? internalPath.replace(/^src\//, '../../')
+    : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
 }
 
 export function calculateParentModuleFileImportPath(moduleName: string, internalPath: string) {
@@ -542,7 +544,7 @@ export function outputEntitySuperClassImport(module: string, legacyTableType: st
   let importPath: string = (legacyTableType !== 'none') ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : calculateModuleFileImportPath(module, `src/entities/common.entity`);
   let importSymbol: string = legacyTableType === 'generated_id' ? "LegacyCommonEntityWithGeneratedId" : legacyTableType === 'existing_id' ? "LegacyCommonEntityWithExistingId" : "CommonEntity";
   if (parentModel != null) {
-    importPath = calculateParentModuleFileImportPath(parentModule, `src/${kebabCase(parentModule)}/entities/${kebabCase(parentModel)}.entity`);
+    importPath = calculateParentModuleFileImportPath(parentModule, `../../${kebabCase(parentModule)}/entities/${kebabCase(parentModel)}.entity`);
     importSymbol = `${classify(parentModel)}`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
@@ -555,10 +557,10 @@ export function outputParentImportPathForDto(parentModel: string | null = null, 
   let importPath = ``;
   let importSymbol = ``;
   if (context === DtoSourceType.Update) {
-    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${kebabCase(parentModule)}/dtos/update-${kebabCase(parentModel)}.dto.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `../../${kebabCase(parentModule)}/dtos/update-${kebabCase(parentModel)}.dto.ts`;
     importSymbol = `Update${classify(parentModel)}Dto`;
   } else if (context === DtoSourceType.Create) {
-    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${kebabCase(parentModule)}/dtos/create-${kebabCase(parentModel)}.dto.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `../../${kebabCase(parentModule)}/dtos/create-${kebabCase(parentModel)}.dto.ts`;
     importSymbol = `Create${classify(parentModel)}Dto`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
