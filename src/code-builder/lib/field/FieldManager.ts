@@ -3,6 +3,7 @@ import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.
 import { findNodes, insertImport } from '@schematics/angular/utility/ast-utils';
 import { Change, NoopChange, RemoveChange, ReplaceChange } from '@schematics/angular/utility/change';
 import { registerDecorator, ValidationArguments, ValidationOptions } from 'class-validator';
+import { kebabCase } from 'lodash';
 import { BigIntFieldHandler } from './field-managers/bigint/BigIntFieldHandler';
 import { BooleanFieldHandler } from './field-managers/boolean/BooleanFieldHandler';
 import { ComputedFieldHandler } from './field-managers/computed/ComputedFieldHandler';
@@ -313,6 +314,40 @@ export function safeInsertImport(source: ts.SourceFile, symbolName: string, impo
     return insertImport(source, source.fileName, symbolName, importFileName);
   }
   return new NoopChange();
+}
+
+export function resolveRelationEntityImportPath(
+  relationModuleName: string | undefined,
+  currentModuleName: string,
+  relatedEntityImportName: string,
+): string {
+  const normalizedRelationModuleName = relationModuleName ? kebabCase(relationModuleName) : '';
+  const isCrossModule = normalizedRelationModuleName && normalizedRelationModuleName !== kebabCase(currentModuleName);
+
+  if (!isCrossModule) {
+    return `./${relatedEntityImportName}`;
+  }
+
+  return normalizedRelationModuleName === SOLID_CORE_MODULE_NAME
+    ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME
+    : `../../${normalizedRelationModuleName}/entities/${relatedEntityImportName}`;
+}
+
+export function resolveRelationDtoImportPath(
+  relationModuleName: string | undefined,
+  currentModuleName: string,
+  relatedDtoImportName: string,
+): string {
+  const normalizedRelationModuleName = relationModuleName ? kebabCase(relationModuleName) : '';
+  const isCrossModule = normalizedRelationModuleName && normalizedRelationModuleName !== kebabCase(currentModuleName);
+
+  if (!isCrossModule) {
+    return `./${relatedDtoImportName}`;
+  }
+
+  return normalizedRelationModuleName === SOLID_CORE_MODULE_NAME
+    ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME
+    : `../../${normalizedRelationModuleName}/dtos/${relatedDtoImportName}`;
 }
 
 // Register a custom decorator

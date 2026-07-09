@@ -7,7 +7,7 @@ import { ArrayDecoratorManager } from '../../decorator-managers/dto/ArrayDecorat
 import { OptionalDecoratorManager } from '../../decorator-managers/dto/OptionalDecoratorManager';
 import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecoratorManager';
 import { TransformDecoratorManager } from '../../decorator-managers/dto/TransformDecoratorManager';
-import { DecoratorType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, safeInsertImport } from '../../FieldManager';
+import { DecoratorType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, resolveRelationDtoImportPath, safeInsertImport } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
 import { ApiPropertyDecoratorManager } from '../../decorator-managers/dto/ApiPropertyDecoratorManager';
 
@@ -272,8 +272,11 @@ export class ManyToManyRelationFieldManagerForDto
 
     relatedFieldImport(): Change {
         const relatedEntityImportName = `update-${kebabCase(this.field.relationCoModelSingularName)}.dto`;
-        const isCrossModule = this.field.relationModelModuleName && kebabCase(this.field.relationModelModuleName) !== kebabCase(this.moduleName);
-        const relatedEntityPath = isCrossModule ? `../../${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
+        const relatedEntityPath = resolveRelationDtoImportPath(
+            this.field.relationModelModuleName,
+            this.moduleName,
+            relatedEntityImportName,
+        );
         return safeInsertImport(this.source, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
         // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath);
     } //Uncomment this method while implementing many-to-many relation changes
