@@ -53,7 +53,8 @@ export class ManyToManyRelationFieldManagerForEntity
 
     relatedFieldImport(): Change {
         const relatedEntityImportName = `${kebabCase(this.field.relationCoModelSingularName)}.entity`;
-        const relatedEntityPath = this.field.relationModelModuleName ? `src/${kebabCase(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
+        const isCrossModule = this.field.relationModelModuleName && kebabCase(this.field.relationModelModuleName) !== kebabCase(this.moduleName);
+        const relatedEntityPath = isCrossModule ? `../../${kebabCase(this.field.relationModelModuleName)}/entities/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
         return safeInsertImport(this.source, classify(this.field.relationCoModelSingularName), relatedEntityPath, this.moduleName);
     }
 
