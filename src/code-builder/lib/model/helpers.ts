@@ -240,7 +240,7 @@ function createBackup(tree: Tree, filePath: string, fileContent: string) {
 }
 
 export function loadModuleMetadata(tree: Tree, moduleName: string): ModuleMetadataConfiguration {
-  const moduleMetadataFilePath = getModuleMetadataFilePath(moduleName);
+  const moduleMetadataFilePath = resolveModuleMetadataFilePath(tree, moduleName);
   const metadata: ModuleMetadataConfiguration = tree.exists(moduleMetadataFilePath) ? JSON.parse(tree.readText(moduleMetadataFilePath)) : null;
   if (!metadata.checksums) metadata.checksums = [];
   return metadata;
@@ -253,6 +253,22 @@ function getModuleMetadataFilePath(moduleName: string) {
   else {
     return `src/${kebabCase(moduleName)}/metadata/${kebabCase(moduleName)}-metadata.json`;
   }
+}
+
+// solid-core is a library dependency, so consuming projects don't always have their own
+// copy of its seed metadata under src/. Mirrors the fallback in
+// ModuleMetadataHelperService.getModuleMetadataFilePath (solid-core-module) so reads
+// succeed against the copy bundled inside node_modules/@solidxai/core when no local
+// override exists.
+function resolveModuleMetadataFilePath(tree: Tree, moduleName: string): string {
+  const localPath = getModuleMetadataFilePath(moduleName);
+  if (moduleName === SOLID_CORE_MODULE_NAME && !tree.exists(localPath)) {
+    const bundledPath = `node_modules/${SOLID_CORE_MODULE_NPM_PACKAGE_NAME}/src/seeders/seed-data/${moduleName}-metadata.json`;
+    if (tree.exists(bundledPath)) {
+      return bundledPath;
+    }
+  }
+  return localPath;
 }
 
 // function getChecksum(tree: Tree, filePath: string, checksums?: Checksum[]) {
@@ -571,7 +587,7 @@ export function unSnakeCase(name: string) {
 }
 
 export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string): any {
-  const metadataFilePath = getModuleMetadataFilePath(moduleName);
+  const metadataFilePath = resolveModuleMetadataFilePath(tree, moduleName);
   if (!tree.exists(metadataFilePath)) {
     throw new Error(`Module metadata file not found at ${metadataFilePath}`);
   }
@@ -611,7 +627,7 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
 }
 
 export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string, fieldNames: string[]): { fields: string[], modelEnableSoftDelete: boolean, dataSourceType: string } {
-  const metadataFilePath = getModuleMetadataFilePath(moduleName);
+  const metadataFilePath = resolveModuleMetadataFilePath(tree, moduleName);
   if (!tree.exists(metadataFilePath)) {
     throw new Error(`Module metadata file not found at ${metadataFilePath}`);
   }
