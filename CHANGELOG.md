@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.10] - 2026-07-13
+
+### Added
+
+- implement relation import path resolution for entity and DTO managers
+
+### Other
+
+- fix for resolving solid-core metadata json in consuming projects
+
 ## [0.1.9] - 2026-07-09
 
 ### Other
