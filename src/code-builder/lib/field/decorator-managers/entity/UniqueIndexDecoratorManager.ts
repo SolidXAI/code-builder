@@ -212,7 +212,7 @@ export class UniqueIndexDecoratorManager {
         const fields = args[0];
         if (ts.isArrayLiteralExpression(fields)) {
             const fieldNames = fields.elements.map(e => e.getText().replace(/^["']|["']$/g, ""));
-            const supportedTrackerFieldNames = ['deletedTracker', 'publishedTracker', 'uniqueChainTracker'];
+            const supportedTrackerFieldNames = ['deletedTracker', 'publishedTracker'];
             const containsSupportedTrackersOnly = fieldNames.every(field => field === fieldName || supportedTrackerFieldNames.includes(field));
             indexAlreadyPresent = fieldNames.includes(fieldName)
                 && fieldNames.some(field => supportedTrackerFieldNames.includes(field))
