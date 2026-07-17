@@ -69,6 +69,7 @@ export function refreshModel(options: any): Rule {
 
 function addModel(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
+    options.draftPublishWorkflowEnabled = generateModelHelpers.normalizeBooleanOption(options.draftPublishWorkflowEnabled);
     // If the module is solid-core, the code needs to be generated in src/ since solid-core-module is a library & there is only 1 module
     const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
     //Link to a templates folder
@@ -123,6 +124,7 @@ export function removeFields(options: any): Rule {
     const metadataResult = readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames);
     options.fields = metadataResult.fields;
     options.modelEnableSoftDelete = metadataResult.modelEnableSoftDelete;
+    options.draftPublishWorkflowEnabled = metadataResult.draftPublishWorkflowEnabled;
     options.dataSourceType = metadataResult.dataSourceType;
 
     const normalizedFields = normalizeFieldType(options.fields);
@@ -212,4 +214,3 @@ function showTree(sourceNode: ts.SourceFile){
   }
   printAllChildren(sourceNode, 0);
 }
-

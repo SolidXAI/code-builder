@@ -20,6 +20,10 @@
       "type": "string",
       "description": "This will indicate model has soft delete enabled"
     },
+    "draftPublishWorkflowEnabled": {
+      "type": "string",
+      "description": "This will indicate model has draft publish workflow enabled"
+    },
     "fields": {
       "oneOf": [
         {

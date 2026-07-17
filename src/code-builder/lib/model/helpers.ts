@@ -316,6 +316,7 @@ function applyChanges(tree: Tree, filePath: string, changes: Change[]) {
 
 export function addField(tree: Tree, options: any, field: any) {
   try {
+    field = withModelWorkflowOptions(options, field);
     const fieldHandler = getFieldHandler(
       tree,
       options.module,
@@ -336,6 +337,7 @@ export function addField(tree: Tree, options: any, field: any) {
 }
 export function removeField(tree: Tree, options: any, field: any) {
   try {
+    field = withModelWorkflowOptions(options, field);
     const fieldHandler = getFieldHandler(
       tree,
       options.module,
@@ -357,6 +359,7 @@ export function removeField(tree: Tree, options: any, field: any) {
 
 export function updateField(tree: Tree, options: any, field: any) {
   try {
+    field = withModelWorkflowOptions(options, field);
     const fieldHandler = getFieldHandler(
       tree,
       options.module,
@@ -376,6 +379,17 @@ export function updateField(tree: Tree, options: any, field: any) {
   catch (e) {
     console.error('Error while updating field' + field.name, e);
   }
+}
+
+function withModelWorkflowOptions(options: any, field: any) {
+  return {
+    ...field,
+    modelDraftPublishWorkflowEnabled: normalizeBooleanOption(options.draftPublishWorkflowEnabled),
+  };
+}
+
+export function normalizeBooleanOption(value: any): boolean {
+  return value === true || value === 'true';
 }
 
 function applyFieldChanges(tree: Tree, moduleName: string, fieldChanges: FieldChange[], generateChecksum: boolean = false) {
@@ -611,7 +625,7 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
     dataSource: model.dataSource,
     dataSourceType: model.dataSourceType,
     modelEnableSoftDelete: model.enableSoftDelete,
-    draftPublishWorkflowEnabled: model.draftPublishWorkflow,
+    draftPublishWorkflowEnabled: normalizeBooleanOption(model.draftPublishWorkflow),
     legacyTableType: model.legacyTableType ?? 'none',
     fields: model.fields.map((f: any) => JSON.stringify(f)),
     parentModel: null,
@@ -626,7 +640,7 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
   return options;
 }
 
-export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string, fieldNames: string[]): { fields: string[], modelEnableSoftDelete: boolean, dataSourceType: string } {
+export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string, fieldNames: string[]): { fields: string[], modelEnableSoftDelete: boolean, draftPublishWorkflowEnabled: boolean, dataSourceType: string } {
   const metadataFilePath = resolveModuleMetadataFilePath(tree, moduleName);
   if (!tree.exists(metadataFilePath)) {
     throw new Error(`Module metadata file not found at ${metadataFilePath}`);
@@ -661,6 +675,7 @@ export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, mod
   return {
     fields: matchedFields.map((f: any) => JSON.stringify(f)),
     modelEnableSoftDelete: model.enableSoftDelete ?? false,
+    draftPublishWorkflowEnabled: normalizeBooleanOption(model.draftPublishWorkflow),
     dataSourceType: model.dataSourceType,
   };
 }
