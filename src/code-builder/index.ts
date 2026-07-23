@@ -124,6 +124,7 @@ export function removeFields(options: any): Rule {
     const metadataResult = readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames);
     options.fields = metadataResult.fields;
     options.modelEnableSoftDelete = metadataResult.modelEnableSoftDelete;
+    options.internationalisation = metadataResult.internationalisation;
     options.draftPublishWorkflowEnabled = metadataResult.draftPublishWorkflowEnabled;
     options.dataSourceType = metadataResult.dataSourceType;
 

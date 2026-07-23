@@ -384,6 +384,7 @@ export function updateField(tree: Tree, options: any, field: any) {
 function withModelWorkflowOptions(options: any, field: any) {
   return {
     ...field,
+    modelInternationalisationEnabled: normalizeBooleanOption(options.internationalisation),
     modelDraftPublishWorkflowEnabled: normalizeBooleanOption(options.draftPublishWorkflowEnabled),
   };
 }
@@ -625,6 +626,7 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
     dataSource: model.dataSource,
     dataSourceType: model.dataSourceType,
     modelEnableSoftDelete: model.enableSoftDelete,
+    internationalisation: normalizeBooleanOption(model.internationalisation),
     draftPublishWorkflowEnabled: normalizeBooleanOption(model.draftPublishWorkflow),
     legacyTableType: model.legacyTableType ?? 'none',
     fields: model.fields.map((f: any) => JSON.stringify(f)),
@@ -640,7 +642,7 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
   return options;
 }
 
-export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string, fieldNames: string[]): { fields: string[], modelEnableSoftDelete: boolean, draftPublishWorkflowEnabled: boolean, dataSourceType: string } {
+export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string, fieldNames: string[]): { fields: string[], modelEnableSoftDelete: boolean, internationalisation: boolean, draftPublishWorkflowEnabled: boolean, dataSourceType: string } {
   const metadataFilePath = resolveModuleMetadataFilePath(tree, moduleName);
   if (!tree.exists(metadataFilePath)) {
     throw new Error(`Module metadata file not found at ${metadataFilePath}`);
@@ -675,6 +677,7 @@ export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, mod
   return {
     fields: matchedFields.map((f: any) => JSON.stringify(f)),
     modelEnableSoftDelete: model.enableSoftDelete ?? false,
+    internationalisation: normalizeBooleanOption(model.internationalisation),
     draftPublishWorkflowEnabled: normalizeBooleanOption(model.draftPublishWorkflow),
     dataSourceType: model.dataSourceType,
   };

@@ -9,6 +9,7 @@ interface IndexDecoratorOptions {
     field: any;
     modelEnableSoftDelete?: any;
     modelDraftPublishWorkflowEnabled?: any;
+    modelInternationalisationEnabled?: any;
 }
 
 export class IndexDecoratorManager implements DecoratorManager {
@@ -148,7 +149,11 @@ export class IndexDecoratorManager implements DecoratorManager {
 
     private shouldUseClassUniqueIndex(): boolean {
         return this.options.field.unique
-            && (this.isTruthy(this.options.modelEnableSoftDelete) || this.isTruthy(this.options.modelDraftPublishWorkflowEnabled));
+            && (
+                this.isTruthy(this.options.modelEnableSoftDelete)
+                || this.isTruthy(this.options.modelDraftPublishWorkflowEnabled)
+                || this.isTruthy(this.options.modelInternationalisationEnabled)
+            );
     }
 
     private isTruthy(value: any): boolean {

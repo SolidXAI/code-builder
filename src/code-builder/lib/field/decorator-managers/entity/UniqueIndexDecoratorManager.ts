@@ -10,6 +10,7 @@ interface UniqueIndexDecoratorOptions {
     field: any;
     modelEnableSoftDelete?: any;
     modelDraftPublishWorkflowEnabled?: any;
+    modelInternationalisationEnabled?: any;
 }
 
 export class UniqueIndexDecoratorManager {
@@ -166,6 +167,9 @@ export class UniqueIndexDecoratorManager {
 
     private getUniqueTrackerFieldNames(): string[] {
         const trackerFieldNames: string[] = [];
+        if (this.isTruthy(this.options.modelInternationalisationEnabled)) {
+            trackerFieldNames.push('localeName');
+        }
         if (this.isTruthy(this.options.modelEnableSoftDelete)) {
             trackerFieldNames.push('deletedTracker');
         }
@@ -212,7 +216,7 @@ export class UniqueIndexDecoratorManager {
         const fields = args[0];
         if (ts.isArrayLiteralExpression(fields)) {
             const fieldNames = fields.elements.map(e => e.getText().replace(/^["']|["']$/g, ""));
-            const supportedTrackerFieldNames = ['deletedTracker', 'publishedTracker'];
+            const supportedTrackerFieldNames = ['localeName', 'deletedTracker', 'publishedTracker'];
             const containsSupportedTrackersOnly = fieldNames.every(field => field === fieldName || supportedTrackerFieldNames.includes(field));
             indexAlreadyPresent = fieldNames.includes(fieldName)
                 && fieldNames.some(field => supportedTrackerFieldNames.includes(field))
