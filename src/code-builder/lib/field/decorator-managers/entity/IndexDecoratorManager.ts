@@ -7,15 +7,13 @@ interface IndexDecoratorOptions {
     index: boolean;
     source: ts.SourceFile;
     field: any;
-    modelEnableSoftDelete?: any;
-    modelDraftPublishWorkflowEnabled?: any;
-    modelInternationalisationEnabled?: any;
+    modelEnableSoftDelete?: any
 }
 
 export class IndexDecoratorManager implements DecoratorManager {
     constructor(public options: IndexDecoratorOptions, public fieldNode?: PropertyDeclaration) { }
     isApplyDecorator(): boolean {
-        return (this.options.index || (!this.shouldUseClassUniqueIndex() && this.options.field.unique)) && this.options.field.relationType !== RelationType.ManyToMany && this.options.field.relationType !== RelationType.OneToMany;
+        return (this.options.index || (!this.options.modelEnableSoftDelete && this.options.field.unique)) && this.options.field.relationType !== RelationType.ManyToMany && this.options.field.relationType !== RelationType.OneToMany;
     }
     decoratorName(): string {
         return 'Index';
@@ -82,7 +80,8 @@ export class IndexDecoratorManager implements DecoratorManager {
 
     private createIndexDecorator(): ts.ModifierLike {
         const indexArguments: ts.Expression[] = [];
-        if (!this.shouldUseClassUniqueIndex() && this.options.field.unique) {
+        if ((this.options.modelEnableSoftDelete === undefined || this.options.modelEnableSoftDelete === false) 
+            && this.options.field.unique) {
             indexArguments.push(
                 ts.factory.createObjectLiteralExpression([
                     ts.factory.createPropertyAssignment(
@@ -118,7 +117,8 @@ export class IndexDecoratorManager implements DecoratorManager {
     private buildColumnDecoratorOptions(): Map<string, any> { 
         const options: Map<string, any> = new Map<string, any>();
     
-        if (!this.shouldUseClassUniqueIndex() && this.options.field.unique) {
+        if ((this.options.modelEnableSoftDelete === undefined || this.options.modelEnableSoftDelete === false) 
+            && this.options.field.unique) {
             options.set('unique', true);
         }
     
@@ -145,18 +145,5 @@ export class IndexDecoratorManager implements DecoratorManager {
             .join(', ');
     
         return `{ ${optionsString} }`;
-    }
-
-    private shouldUseClassUniqueIndex(): boolean {
-        return this.options.field.unique
-            && (
-                this.isTruthy(this.options.modelEnableSoftDelete)
-                || this.isTruthy(this.options.modelDraftPublishWorkflowEnabled)
-                || this.isTruthy(this.options.modelInternationalisationEnabled)
-            );
-    }
-
-    private isTruthy(value: any): boolean {
-        return value === true || value === 'true';
     }
 }

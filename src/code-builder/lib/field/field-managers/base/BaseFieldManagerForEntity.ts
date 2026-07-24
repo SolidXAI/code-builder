@@ -61,7 +61,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     )?.parent as PropertyDeclaration | undefined;
 
     this.indexDecoratorManager = new IndexDecoratorManager(
-      { index: this.field.index, source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete, modelDraftPublishWorkflowEnabled: this.field.modelDraftPublishWorkflowEnabled, modelInternationalisationEnabled: this.field.modelInternationalisationEnabled },
+      { index: this.field.index, source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete },
       fieldPropertyDeclarationNode,
     );
     this.columnDecoratorManager = new ColumnDecoratorManager(
@@ -137,7 +137,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       },
     );
     this.uniqueIndexDecoratorManager = new UniqueIndexDecoratorManager(
-      { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete, modelDraftPublishWorkflowEnabled: this.field.modelDraftPublishWorkflowEnabled, modelInternationalisationEnabled: this.field.modelInternationalisationEnabled },
+      { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete},
       this.getClassNode(this.modelName, this.source)
     );
     this.oneToManyDecoratorManager = new OneToManyDecoratorManager(
