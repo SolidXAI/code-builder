@@ -69,7 +69,6 @@ export function refreshModel(options: any): Rule {
 
 function addModel(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    options.draftPublishWorkflowEnabled = generateModelHelpers.normalizeBooleanOption(options.draftPublishWorkflowEnabled);
     // If the module is solid-core, the code needs to be generated in src/ since solid-core-module is a library & there is only 1 module
     const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
     //Link to a templates folder
@@ -121,12 +120,7 @@ export function removeFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     // Resolve field names to full field definitions from metadata
     const fieldNames = Array.isArray(options.fieldNamesForRemoval) ? options.fieldNamesForRemoval : [options.fieldNamesForRemoval];
-    const metadataResult = readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames);
-    options.fields = metadataResult.fields;
-    options.modelEnableSoftDelete = metadataResult.modelEnableSoftDelete;
-    options.internationalisation = metadataResult.internationalisation;
-    options.draftPublishWorkflowEnabled = metadataResult.draftPublishWorkflowEnabled;
-    options.dataSourceType = metadataResult.dataSourceType;
+    Object.assign(options, readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames));
 
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
