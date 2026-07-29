@@ -66,6 +66,12 @@ export class <%= classify(model) %>Controller {
   @ApiQuery({ name: 'populate', required: false, type: Array })
   @ApiQuery({ name: 'populateMedia', required: false, type: Array })
   @ApiQuery({ name: 'filters', required: false, type: Array })
+<% if (draftPublishWorkflowEnabled) { %>
+  @ApiQuery({ name: 'status', required: false, enum: ['draft', 'published'] })
+  @ApiQuery({ name: 'isLatest', required: false, type: Boolean })
+  @ApiQuery({ name: 'isPublished', required: false, type: Boolean })
+  @ApiQuery({ name: 'initialEntityVersionId', required: false, type: Number })
+<% } %>
   @Get()
   async findMany(@Query() query: any) { 
     return this.service.find(query);  
@@ -89,5 +95,18 @@ export class <%= classify(model) %>Controller {
     return this.service.delete(id);
   }
 
+<% if (draftPublishWorkflowEnabled) { %>
+  @ApiBearerAuth("jwt")
+  @Post(':id/publish')
+  async publish(@Param('id') id: number) {
+    return this.service.publishRecord(id);
+  }
+
+  @ApiBearerAuth("jwt")
+  @Post(':id/unpublish')
+  async unpublish(@Param('id') id: number) {
+    return this.service.unpublishRecord(id);
+  }
+<% } %>
 
 }
