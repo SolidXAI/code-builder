@@ -1,6 +1,13 @@
 import { Tree } from '@angular-devkit/schematics';
-import { FieldChange, FieldHandler, FieldManager } from '../../FieldManager';
+import {
+  DtoSourceType,
+  FieldChange,
+  FieldHandler,
+  FieldManager,
+  ManagerForDtoOptions,
+} from '../../FieldManager';
 import { ComputedFieldManagerForEntity } from './ComputedFieldManagerForEntity';
+import { ComputedFieldManagerForDto } from './ComputedFieldManagerForDto';
 export class ComputedFieldHandler implements FieldHandler {
   entityFieldManager: FieldManager;
   createDtoFieldManager: FieldManager;
@@ -20,19 +27,38 @@ export class ComputedFieldHandler implements FieldHandler {
       field,
       modelEnableSoftDelete,
     );
-    //Instantiate the entity and dto source files
+    this.createDtoFieldManager = new ComputedFieldManagerForDto(
+      tree,
+      moduleName,
+      modelName,
+      field,
+      new ManagerForDtoOptions(DtoSourceType.Create),
+    );
+    this.updateDtoFieldManager = new ComputedFieldManagerForDto(
+      tree,
+      moduleName,
+      modelName,
+      field,
+      new ManagerForDtoOptions(DtoSourceType.Update),
+    );
   }
   updateEntityField(): FieldChange[] {
     return this.entityFieldManager.updateField();
   }
   updateDtoField(): FieldChange[] {
-    return [];
+    return [
+      ...this.createDtoFieldManager.updateField(),
+      ...this.updateDtoFieldManager.updateField(),
+    ];
   }
   removeEntityField(): FieldChange[] {
     return this.entityFieldManager.removeField();
   }
   removeDtoField(): FieldChange[] {
-    return [];
+    return [
+      ...this.createDtoFieldManager.removeField(),
+      ...this.updateDtoFieldManager.removeField(),
+    ];
   }
   addEntityField(): FieldChange[] {
     return this.entityFieldManager.addField();
