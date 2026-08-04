@@ -120,10 +120,7 @@ export function removeFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     // Resolve field names to full field definitions from metadata
     const fieldNames = Array.isArray(options.fieldNamesForRemoval) ? options.fieldNamesForRemoval : [options.fieldNamesForRemoval];
-    const metadataResult = readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames);
-    options.fields = metadataResult.fields;
-    options.modelEnableSoftDelete = metadataResult.modelEnableSoftDelete;
-    options.dataSourceType = metadataResult.dataSourceType;
+    Object.assign(options, readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames));
 
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
@@ -212,4 +209,3 @@ function showTree(sourceNode: ts.SourceFile){
   }
   printAllChildren(sourceNode, 0);
 }
-

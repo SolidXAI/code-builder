@@ -9,12 +9,14 @@ interface UniqueIndexDecoratorOptions {
     source: ts.SourceFile;
     field: any;
     modelEnableSoftDelete?: any;
+    modelDraftPublishWorkflowEnabled?: any;
+    modelInternationalisationEnabled?: any;
 }
 
 export class UniqueIndexDecoratorManager {
     constructor(public options: UniqueIndexDecoratorOptions, public classNode: ClassDeclaration, public fieldNode?: PropertyDeclaration) { }
     isApplyDecorator(): boolean {
-        return this.options.unique && this.options.modelEnableSoftDelete;
+        return this.options.unique && this.getUniqueTrackerFieldNames().length > 0;
     }
     decoratorName(): string {
         return 'Index';
@@ -25,7 +27,10 @@ export class UniqueIndexDecoratorManager {
     buildDecorator(): PartialAddFieldChange {
         const fieldSourceLines = [];
         const changes: Change[] = [];
-        const indexDecoratorLine = `@Index(["${this.options.fieldName}", "deletedTracker"], { unique: true })`;
+        const indexFields = [this.options.fieldName, ...this.getUniqueTrackerFieldNames()]
+            .map(fieldName => `"${fieldName}"`)
+            .join(', ');
+        const indexDecoratorLine = `@Index([${indexFields}], { unique: true })`;
         fieldSourceLines.push(indexDecoratorLine);
         changes.push(...this.decoratorImports());
         return {
@@ -133,10 +138,7 @@ export class UniqueIndexDecoratorManager {
         // Re-create the column decorator with the merged column decorator options
         const decoratorIdentifier = ts.factory.createIdentifier(this.decoratorName());
         const fieldsArray = ts.factory.createArrayLiteralExpression(
-            [
-                ts.factory.createStringLiteral(this.options.fieldName),
-                ts.factory.createStringLiteral("deletedTracker")
-            ],
+            [this.options.fieldName, ...this.getUniqueTrackerFieldNames()].map(fieldName => ts.factory.createStringLiteral(fieldName)),
             false
         )
         const decoratorOptions = ts.factory.createObjectLiteralExpression(newPropertyAssignments);
@@ -161,6 +163,24 @@ export class UniqueIndexDecoratorManager {
             }
         });
         return decoratorOptions;
+    }
+
+    private getUniqueTrackerFieldNames(): string[] {
+        const trackerFieldNames: string[] = [];
+        if (this.isTruthy(this.options.modelInternationalisationEnabled)) {
+            trackerFieldNames.push('localeName');
+        }
+        if (this.isTruthy(this.options.modelEnableSoftDelete)) {
+            trackerFieldNames.push('deletedTracker');
+        }
+        if (this.isTruthy(this.options.modelDraftPublishWorkflowEnabled)) {
+            trackerFieldNames.push('publishedTracker');
+        }
+        return trackerFieldNames;
+    }
+
+    private isTruthy(value: any): boolean {
+        return value === true || value === 'true';
     }
 
     private filterOtherDecorators(name: string, existingModifiers: ts.NodeArray<ts.ModifierLike> | undefined): ts.Decorator[] {
@@ -196,8 +216,11 @@ export class UniqueIndexDecoratorManager {
         const fields = args[0];
         if (ts.isArrayLiteralExpression(fields)) {
             const fieldNames = fields.elements.map(e => e.getText().replace(/^["']|["']$/g, ""));
-            // Check if fieldNames only contains the field name and deletedTracker
-            indexAlreadyPresent = fieldNames.includes(fieldName) && fieldNames.includes('deletedTracker') && fieldNames.length === 2;
+            const supportedTrackerFieldNames = ['localeName', 'deletedTracker', 'publishedTracker'];
+            const containsSupportedTrackersOnly = fieldNames.every(field => field === fieldName || supportedTrackerFieldNames.includes(field));
+            indexAlreadyPresent = fieldNames.includes(fieldName)
+                && fieldNames.some(field => supportedTrackerFieldNames.includes(field))
+                && containsSupportedTrackersOnly;
             // console.log('fieldNames', fieldNames);
             // console
         }
