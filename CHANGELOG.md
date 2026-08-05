@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.1.11-beta.0] - 2026-08-05
+
+### Added
+
+- add ComputedFieldManagerForDto and integrate into ComputedFieldHandler
+- integrate EmptyStringToNullDecoratorManager into EmailFieldManagerForDto
+- add internationalisation support to model and field management
+- add draft publish workflow support to model and field management
+
+### Fixed
+
+- remove 'uniqueChainTracker' from supported tracker field names in UniqueIndexDecoratorManager
+
+### Maintenance
+
+- remove obsolete schema files for add and update fields, and add model
+
+### Other
+
+- Revert "Revert "feat: add draft publish workflow support to model and field management""
+- Revert "feat: add draft publish workflow support to model and field management"
+- cleanup changes
+
 ## [0.1.10] - 2026-07-13
 
 ### Added
