@@ -11,6 +11,7 @@ import {
   FieldChange,
   RemoveChangeSSS,
   ReplaceChangeSSS,
+  getClassNode,
   getFieldHandler,
 } from '../field/FieldManager';
 import { SupportedDatabases } from '../field/db-helpers';
@@ -20,6 +21,9 @@ export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidxai/core';
 
 // export const CHECKSUM_FILE_PATH = 'code-builder/output/checksums.json';
 export const CHECKSUM_HASH_ALGORITHM = 'md5';
+
+const DRAFT_PUBLISH_ENDPOINT_METHOD_NAMES = ['publish', 'unpublish'];
+
 export enum Command {
   AddModule = 'add-module',
   AddModel = 'add-model',
@@ -379,6 +383,89 @@ export function updateField(tree: Tree, options: any, field: any) {
   catch (e) {
     console.error('Error while updating field' + field.name, e);
   }
+}
+
+function getControllerClassNode(tree: Tree, options: any): { source: ts.SourceFile, controllerFilePath: string, classNode: ts.ClassDeclaration } | null {
+  const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
+  const controllerFilePath = `${modulePath}/controllers/${kebabCase(options.model)}.controller.ts`;
+  if (!tree.exists(controllerFilePath)) return null;
+
+  const source = ts.createSourceFile(
+    controllerFilePath,
+    tree.readText(controllerFilePath),
+    ts.ScriptTarget.Latest,
+    true,
+  );
+
+  const classNode = getClassNode(`${classify(options.model)}Controller`, source);
+  if (!classNode) return null;
+
+  return { source, controllerFilePath, classNode };
+}
+
+// Patches publish/unpublish routes into an already-generated controller. Caller must check
+// draftPublishWorkflowEnabled first; this only handles the additive AST patch, skipped if the
+// `publish` method already exists so hand-written controller methods are never touched.
+export function addDraftPublishEndpoints(tree: Tree, options: any): void {
+  const controller = getControllerClassNode(tree, options);
+  if (!controller) return;
+  const { source, controllerFilePath, classNode } = controller;
+
+  const hasPublishEndpoint = classNode.members.some(
+    (member) => ts.isMethodDeclaration(member) && member.name?.getText(source) === 'publish',
+  );
+  if (hasPublishEndpoint) return;
+
+  const draftPublishEndpoints = `
+  @ApiBearerAuth("jwt")
+  @Post(':id/publish')
+  async publish(@Param('id') id: number) {
+    return this.service.publishRecord(id);
+  }
+
+  @ApiBearerAuth("jwt")
+  @Post(':id/unpublish')
+  async unpublish(@Param('id') id: number) {
+    return this.service.unpublishRecord(id);
+  }
+`;
+
+  const updateRecorder = tree.beginUpdate(controllerFilePath);
+  updateRecorder.insertLeft(classNode.end - 1, draftPublishEndpoints);
+  tree.commitUpdate(updateRecorder);
+}
+
+// Reverses addDraftPublishEndpoints when draft/publish is turned off on an existing model:
+// calling publishRecord()/unpublishRecord() would just throw once the model's workflow flag
+// is off, so the generated routes are dead code and get removed. Matches methods by name only
+// (`publish`/`unpublish`), so a hand-renamed or hand-written method with either name would also
+// be removed here — an accepted tradeoff since the code-builder can't otherwise distinguish its
+// own generated methods from hand-written ones with the same name.
+export function removeDraftPublishEndpoints(tree: Tree, options: any): void {
+  const controller = getControllerClassNode(tree, options);
+  if (!controller) return;
+  const { source, controllerFilePath, classNode } = controller;
+
+  const endpointMethods = classNode.members.filter(
+    (member) => ts.isMethodDeclaration(member) && DRAFT_PUBLISH_ENDPOINT_METHOD_NAMES.includes(member.name?.getText(source) ?? ''),
+  );
+  if (endpointMethods.length === 0) return;
+
+  const updateRecorder = tree.beginUpdate(controllerFilePath);
+  endpointMethods.forEach((member) => {
+    updateRecorder.remove(member.pos, member.getFullText(source).length);
+  });
+  tree.commitUpdate(updateRecorder);
+}
+
+// Reconciles the controller's publish/unpublish routes with the model's current
+// draftPublishWorkflowEnabled state — the single entry point callers should use.
+export function syncDraftPublishEndpoints(tree: Tree, options: any): void {
+  if (normalizeBooleanOption(options.draftPublishWorkflowEnabled)) {
+    addDraftPublishEndpoints(tree, options);
+    return;
+  }
+  removeDraftPublishEndpoints(tree, options);
 }
 
 function withModelWorkflowOptions(options: any, field: any) {

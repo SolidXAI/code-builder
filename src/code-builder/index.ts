@@ -112,6 +112,11 @@ function updateFields(options: any): Rule {
     fields.forEach((field: any) => {
       generateModelHelpers.updateField(tree, options, field);
     });
+    // addModel only renders the controller once, on first creation, so an existing model
+    // toggling draft/publish afterwards never gets its publish/unpublish routes added or
+    // removed. Reconciled here since this rule already runs on every refresh regardless
+    // of model age.
+    generateModelHelpers.syncDraftPublishEndpoints(tree, options);
     return tree;
   };
 }
