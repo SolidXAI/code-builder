@@ -4,11 +4,7 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { <%= classify(model) %>Service } from '../services/<%= dasherize(model) %>.service';
 import { Create<%= classify(model) %>Dto } from '../dtos/create-<%= dasherize(model) %>.dto';
 import { Update<%= classify(model) %>Dto } from '../dtos/update-<%= dasherize(model) %>.dto';
-
-enum ShowSoftDeleted {
-  INCLUSIVE = "inclusive",
-  EXCLUSIVE = "exclusive",
-}
+<%= showSoftDeletedImport(module) %>
 
 @ApiTags('<%= unSnakeCase(moduleDisplayName) %>')
 @Controller('<%= dasherize(model) %>')
