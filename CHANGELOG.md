@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.12-beta.0] - 2026-09-21
+
+### Added
+
+- add relationCreateInverse option to ManyToManyDecoratorOptions
+- implement showSoftDeletedImport function and refactor generateModelUtils
+
+### Fixed
+
+- update parseDefaultValue and defaultValueInitializer to handle boolean inputs
+
 ## [0.1.11] - 2026-08-20
 
 ### Added
