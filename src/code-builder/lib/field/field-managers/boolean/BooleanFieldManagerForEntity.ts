@@ -33,17 +33,19 @@ export class BooleanFieldManagerForEntity
     return options; 
   }
 
-  protected override parseDefaultValue(defaultValue: string): boolean | null {
-    try {
-      return defaultValue === 'true' ? true : false;
+  protected override parseDefaultValue(defaultValue: boolean | string | null | undefined): boolean | null {
+    if (typeof defaultValue === 'boolean') return defaultValue;
+
+    if (typeof defaultValue === 'string') {
+      const normalizedDefaultValue = defaultValue.trim().toLowerCase();
+      if (normalizedDefaultValue === 'true') return true;
+      if (normalizedDefaultValue === 'false') return false;
     }
-    catch (e) {
-      // console.log(`Could not set default value ${defaultValue}  for field ${this.field.name} in model ${this.modelName}`);
-    }
+
     return null;
   }
 
-  protected override defaultValueInitializer(defaultValueConfig: string): DefaultValueInitializer | null {
+  protected override defaultValueInitializer(defaultValueConfig: boolean | string | null | undefined): DefaultValueInitializer | null {
     const defaultValue = this.parseDefaultValue(defaultValueConfig) ?? false;
     return {
       value: defaultValue,

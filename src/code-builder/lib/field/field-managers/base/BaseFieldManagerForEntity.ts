@@ -117,6 +117,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
         isManyToMany: this.isManyToMany(),
         relationModelName: this.field.relationCoModelSingularName,
         relationInverseFieldName: this.field.relationCoModelFieldName,
+        relationCreateInverse: this.field.relationCreateInverse === true,
         owner: this.field.isRelationManyToManyOwner,
         source: this.source,
         field: this.field,
