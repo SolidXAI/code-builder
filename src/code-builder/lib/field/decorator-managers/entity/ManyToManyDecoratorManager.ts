@@ -9,6 +9,7 @@ interface ManyToManyDecoratorOptions {
     isManyToMany: boolean;
     relationModelName: string;
     relationInverseFieldName: string;
+    relationCreateInverse: boolean;
     owner: boolean;
     source: ts.SourceFile;
     field: any;
@@ -44,7 +45,7 @@ export class ManyToManyDecoratorManager implements DecoratorManager {
 
         const fieldSourceLineComponents: string[] = [];
         fieldSourceLineComponents.push(`() => ${classify(this.options.relationModelName)}`);
-        this.options.relationInverseFieldName ? fieldSourceLineComponents.push(`${camelCase(this.options.relationModelName)} => ${camelCase(this.options.relationModelName)}.${this.options.relationInverseFieldName}`) : "no-ops";
+        this.options.relationCreateInverse && this.options.relationInverseFieldName ? fieldSourceLineComponents.push(`${camelCase(this.options.relationModelName)} => ${camelCase(this.options.relationModelName)}.${this.options.relationInverseFieldName}`) : "no-ops";
         fieldSourceLineComponents.push(`${this.buildRelationOptionsCode()}`);
         fieldSourceLines.push(`@${this.decoratorName()}(${fieldSourceLineComponents.join(', ')})`);
 
@@ -155,7 +156,7 @@ export class ManyToManyDecoratorManager implements DecoratorManager {
         );
         argumentsArray.push(typeFunctionOrTarget);
 
-        if (this.options.relationInverseFieldName) {
+        if (this.options.relationCreateInverse && this.options.relationInverseFieldName) {
             // 2nd Argument: Inverse side
             const inverseSide = ts.factory.createArrowFunction(
                 undefined,
