@@ -19,7 +19,11 @@ import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/
 import { kebabCase } from 'lodash';
 
 import { classify } from './lib/string.utils';
-const generateModelUtils = { dasherize: kebabCase, classify, ...generateModelHelpers };
+const generateModelUtils = {
+  dasherize: kebabCase,
+  classify,
+  ...generateModelHelpers,
+};
 // You don't have to export the function as default. You can also have more than one rule factory
 // per file.
 export function addModule(options: any): Rule {
