@@ -1,4 +1,5 @@
-import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
+import { kebabCase } from 'lodash';
+import { classify } from '../../../string.utils';
 import { Tree } from '@angular-devkit/schematics';
 import ts, {
   ClassDeclaration,
@@ -59,8 +60,8 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     protected readonly field: any,
     protected readonly options: ManagerForDtoOptions,
   ) {
-    const sourceFileName = (options.sourceType === DtoSourceType.Create) ? `create-${dasherize(modelName)}.dto.ts` : `update-${dasherize(modelName)}.dto.ts`;
-    const sourcePath = `src/${dasherize(moduleName)}/dtos/${sourceFileName}`;
+    const sourceFileName = (options.sourceType === DtoSourceType.Create) ? `create-${kebabCase(modelName)}.dto.ts` : `update-${kebabCase(modelName)}.dto.ts`;
+    const sourcePath = `src/${kebabCase(moduleName)}/dtos/${sourceFileName}`;
     this.source = createSourceFile(
       tree,
       sourcePath,
@@ -95,7 +96,6 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     }
     return fieldChanges;
   }
-
 
   fieldName(): string {
     return this.field.name;
@@ -161,7 +161,6 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
     const builderChanges: PartialAddFieldChange[] = [];
     builderChanges.push(...this.applyBuildDecoratorTransformations(...decoratorManagers.reverse()));
 
-
     // Capture the changes and field source lines
     builderChanges.forEach((builderChange) => {
       changes.push(...builderChange.changes);
@@ -225,7 +224,6 @@ export abstract class BaseFieldManagerForDto implements FieldManager {
       fieldName,
       source,
     )?.parent as PropertyDeclaration;
-
 
     // FIXME Handle the imports related to the updated field type
     // Update the entity property declaration type

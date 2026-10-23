@@ -1,7 +1,5 @@
-import {
-  classify,
-  dasherize
-} from '@angular-devkit/core/src/utils/strings';
+import { kebabCase } from 'lodash';
+import { classify } from '../../../string.utils';
 import { Tree } from '@angular-devkit/schematics';
 import ts, {
   PropertyDeclaration,
@@ -55,7 +53,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     // So every operation should use a new instance of the field manager, so updated tree/source is used before each operation
     this.source = createSourceFile(
       tree,
-      `src/${dasherize(moduleName)}/entities/${dasherize(modelName)}.entity.ts`,
+      `src/${kebabCase(moduleName)}/entities/${kebabCase(modelName)}.entity.ts`,
     );
     const fieldPropertyDeclarationNode = this.getFieldIdentifierNode(
       this.fieldName(),
@@ -63,7 +61,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     )?.parent as PropertyDeclaration | undefined;
 
     this.indexDecoratorManager = new IndexDecoratorManager(
-      { index: this.field.index, source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete },
+      { index: this.field.index, source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete, modelDraftPublishWorkflowEnabled: this.field.modelDraftPublishWorkflowEnabled, modelInternationalisationEnabled: this.field.modelInternationalisationEnabled },
       fieldPropertyDeclarationNode,
     );
     this.columnDecoratorManager = new ColumnDecoratorManager(
@@ -139,7 +137,7 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       },
     );
     this.uniqueIndexDecoratorManager = new UniqueIndexDecoratorManager(
-      { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete},
+      { unique: this.field.unique, fieldName: this.fieldName(), source: this.source, field: this.field, modelEnableSoftDelete: this.modelEnableSoftDelete, modelDraftPublishWorkflowEnabled: this.field.modelDraftPublishWorkflowEnabled, modelInternationalisationEnabled: this.field.modelInternationalisationEnabled },
       this.getClassNode(this.modelName, this.source)
     );
     this.oneToManyDecoratorManager = new OneToManyDecoratorManager(
@@ -180,7 +178,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     //Add the decorators to the field declaration
     const builderChanges: PartialAddFieldChange[] = [];
     builderChanges.push(...this.applyBuildDecoratorTransformations(...decoratorManagers.reverse()));
-
 
     // Capture the changes and field source lines
     builderChanges.forEach((builderChange) => {
@@ -286,7 +283,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
       fieldName,
       source,
     )?.parent as PropertyDeclaration;
-
 
     // FIXME Handle the imports related to the updated field type
     // Update the entity property declaration type
@@ -483,7 +479,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
     return `${this.field.relationCoModelSingularName}s`;
   }
 
-
   private isManyToOne(): boolean {
     return (this.field.type === 'relation' && this.field.relationType === RelationType.ManyToOne);
   }
@@ -491,7 +486,6 @@ export abstract class BaseFieldManagerForEntity implements FieldManager {
   private isOneToMany(): boolean {
     return (this.field.type === 'relation' && this.field.relationType === RelationType.OneToMany);
   }
-
 
   protected isAdditionalFieldRequired(): boolean {
     return false;

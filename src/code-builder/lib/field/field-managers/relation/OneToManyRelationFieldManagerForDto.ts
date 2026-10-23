@@ -1,4 +1,5 @@
-import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
+import { kebabCase } from 'lodash';
+import { classify } from '../../../string.utils';
 import { Tree } from '@angular-devkit/schematics';
 import ts, { PropertyDeclaration } from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { Change } from '@schematics/angular/utility/change';
@@ -6,7 +7,7 @@ import { ArrayDecoratorManager } from '../../decorator-managers/dto/ArrayDecorat
 import { OptionalDecoratorManager } from '../../decorator-managers/dto/OptionalDecoratorManager';
 import { StringDecoratorManager } from '../../decorator-managers/dto/StringDecoratorManager';
 import { TransformDecoratorManager } from '../../decorator-managers/dto/TransformDecoratorManager';
-import { DecoratorType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, safeInsertImport } from '../../FieldManager';
+import { DecoratorType, FieldChange, FieldManager, FieldType, ManagerForDtoOptions, resolveRelationDtoImportPath, safeInsertImport } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
 import { ApiPropertyDecoratorManager } from '../../decorator-managers/dto/ApiPropertyDecoratorManager';
 
@@ -134,7 +135,6 @@ export class OneToManyRelationFieldManagerForDto
 
   }
 
-
   override updateField(): FieldChange[] {
     const fieldChanges: FieldChange[] = super.updateField();
 
@@ -215,7 +215,6 @@ export class OneToManyRelationFieldManagerForDto
     }
   }
 
-
   override removeAdditionalField(): FieldChange[] {
     const fieldChanges: FieldChange[] = [];
 
@@ -243,8 +242,12 @@ export class OneToManyRelationFieldManagerForDto
   }
 
   relatedFieldImport(): Change {
-    const relatedEntityImportName = `update-${dasherize(this.field.relationCoModelSingularName)}.dto`;
-    const relatedEntityPath = this.field.relationModelModuleName ? `src/${this.field.relationModelModuleName}/dtos/${relatedEntityImportName}` : `./${relatedEntityImportName}`;
+    const relatedEntityImportName = `update-${kebabCase(this.field.relationCoModelSingularName)}.dto`;
+    const relatedEntityPath = resolveRelationDtoImportPath(
+      this.field.relationModelModuleName,
+      this.moduleName,
+      relatedEntityImportName,
+    );
     return safeInsertImport(this.source, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath, this.moduleName);
     // return insertImport(this.source, this.source.fileName, `Update${classify(this.field.relationCoModelSingularName)}Dto`, relatedEntityPath);
   } //Uncomment this method while implementing many-to-many relation changes

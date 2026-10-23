@@ -1,4 +1,5 @@
-import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
+import { kebabCase } from 'lodash';
+import { classify } from '../string.utils';
 import { Tree } from '@angular-devkit/schematics';
 import { MetadataManager } from '@nestjs/schematics';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
@@ -10,6 +11,7 @@ import {
   FieldChange,
   RemoveChangeSSS,
   ReplaceChangeSSS,
+  getClassNode,
   getFieldHandler,
 } from '../field/FieldManager';
 import { SupportedDatabases } from '../field/db-helpers';
@@ -17,9 +19,11 @@ import { SupportedDatabases } from '../field/db-helpers';
 export const SOLID_CORE_MODULE_NAME = 'solid-core';
 export const SOLID_CORE_MODULE_NPM_PACKAGE_NAME = '@solidxai/core';
 
-
 // export const CHECKSUM_FILE_PATH = 'code-builder/output/checksums.json';
 export const CHECKSUM_HASH_ALGORITHM = 'md5';
+
+const DRAFT_PUBLISH_ENDPOINT_METHOD_NAMES = ['publish', 'unpublish'];
+
 export enum Command {
   AddModule = 'add-module',
   AddModel = 'add-model',
@@ -95,27 +99,27 @@ export function getSolidImports(
     case SolidProviderType.Dto:
       return {
         symbolName: `Create${classify(modelName)}Dto`,
-        importPath: `./dtos/create-${dasherize(modelName)}.dto`,
+        importPath: `./dtos/create-${kebabCase(modelName)}.dto`,
       };
     case SolidProviderType.Service:
       return {
         symbolName: `${classify(modelName)}Service`,
-        importPath: `./services/${dasherize(modelName)}.service`,
+        importPath: `./services/${kebabCase(modelName)}.service`,
       };
     case SolidProviderType.Controller:
       return {
         symbolName: `${classify(modelName)}Controller`,
-        importPath: `./controllers/${dasherize(modelName)}.controller`,
+        importPath: `./controllers/${kebabCase(modelName)}.controller`,
       };
     case SolidProviderType.Entity:
       return {
         symbolName: `${classify(modelName)}`,
-        importPath: `./entities/${dasherize(modelName)}.entity`,
+        importPath: `./entities/${kebabCase(modelName)}.entity`,
       };
       case SolidProviderType.Repository:
         return {
           symbolName: `${classify(modelName)}Repository`,
-          importPath: `./repositories/${dasherize(modelName)}.repository`,
+          importPath: `./repositories/${kebabCase(modelName)}.repository`,
         };
     default:
       throw Error('Invalid SolidProviderType');
@@ -240,7 +244,7 @@ function createBackup(tree: Tree, filePath: string, fileContent: string) {
 }
 
 export function loadModuleMetadata(tree: Tree, moduleName: string): ModuleMetadataConfiguration {
-  const moduleMetadataFilePath = getModuleMetadataFilePath(moduleName);
+  const moduleMetadataFilePath = resolveModuleMetadataFilePath(tree, moduleName);
   const metadata: ModuleMetadataConfiguration = tree.exists(moduleMetadataFilePath) ? JSON.parse(tree.readText(moduleMetadataFilePath)) : null;
   if (!metadata.checksums) metadata.checksums = [];
   return metadata;
@@ -248,11 +252,27 @@ export function loadModuleMetadata(tree: Tree, moduleName: string): ModuleMetada
 
 function getModuleMetadataFilePath(moduleName: string) {
   if (moduleName === SOLID_CORE_MODULE_NAME) {
-    return `src/${moduleName}/seeders/seed-data/${moduleName}-metadata.json`
+    return `src/seeders/seed-data/${moduleName}-metadata.json`
   }
   else {
-    return `module-metadata/${dasherize(moduleName)}/${dasherize(moduleName)}-metadata.json`;
+    return `src/${kebabCase(moduleName)}/metadata/${kebabCase(moduleName)}-metadata.json`;
   }
+}
+
+// solid-core is a library dependency, so consuming projects don't always have their own
+// copy of its seed metadata under src/. Mirrors the fallback in
+// ModuleMetadataHelperService.getModuleMetadataFilePath (solid-core-module) so reads
+// succeed against the copy bundled inside node_modules/@solidxai/core when no local
+// override exists.
+function resolveModuleMetadataFilePath(tree: Tree, moduleName: string): string {
+  const localPath = getModuleMetadataFilePath(moduleName);
+  if (moduleName === SOLID_CORE_MODULE_NAME && !tree.exists(localPath)) {
+    const bundledPath = `node_modules/${SOLID_CORE_MODULE_NPM_PACKAGE_NAME}/src/seeders/seed-data/${moduleName}-metadata.json`;
+    if (tree.exists(bundledPath)) {
+      return bundledPath;
+    }
+  }
+  return localPath;
 }
 
 // function getChecksum(tree: Tree, filePath: string, checksums?: Checksum[]) {
@@ -261,7 +281,6 @@ function getModuleMetadataFilePath(moduleName: string) {
 //   }
 //   return checksums.filter((checksum: Checksum) => checksum.filePath === filePath).pop();
 // }
-
 
 function applyChanges(tree: Tree, filePath: string, changes: Change[]) {
   /*
@@ -301,6 +320,7 @@ function applyChanges(tree: Tree, filePath: string, changes: Change[]) {
 
 export function addField(tree: Tree, options: any, field: any) {
   try {
+    field = withModelWorkflowOptions(options, field);
     const fieldHandler = getFieldHandler(
       tree,
       options.module,
@@ -321,6 +341,7 @@ export function addField(tree: Tree, options: any, field: any) {
 }
 export function removeField(tree: Tree, options: any, field: any) {
   try {
+    field = withModelWorkflowOptions(options, field);
     const fieldHandler = getFieldHandler(
       tree,
       options.module,
@@ -342,6 +363,7 @@ export function removeField(tree: Tree, options: any, field: any) {
 
 export function updateField(tree: Tree, options: any, field: any) {
   try {
+    field = withModelWorkflowOptions(options, field);
     const fieldHandler = getFieldHandler(
       tree,
       options.module,
@@ -361,6 +383,101 @@ export function updateField(tree: Tree, options: any, field: any) {
   catch (e) {
     console.error('Error while updating field' + field.name, e);
   }
+}
+
+function getControllerClassNode(tree: Tree, options: any): { source: ts.SourceFile, controllerFilePath: string, classNode: ts.ClassDeclaration } | null {
+  const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
+  const controllerFilePath = `${modulePath}/controllers/${kebabCase(options.model)}.controller.ts`;
+  if (!tree.exists(controllerFilePath)) return null;
+
+  const source = ts.createSourceFile(
+    controllerFilePath,
+    tree.readText(controllerFilePath),
+    ts.ScriptTarget.Latest,
+    true,
+  );
+
+  const classNode = getClassNode(`${classify(options.model)}Controller`, source);
+  if (!classNode) return null;
+
+  return { source, controllerFilePath, classNode };
+}
+
+// Patches publish/unpublish routes into an already-generated controller. Caller must check
+// draftPublishWorkflowEnabled first; this only handles the additive AST patch, skipped if the
+// `publish` method already exists so hand-written controller methods are never touched.
+export function addDraftPublishEndpoints(tree: Tree, options: any): void {
+  const controller = getControllerClassNode(tree, options);
+  if (!controller) return;
+  const { source, controllerFilePath, classNode } = controller;
+
+  const hasPublishEndpoint = classNode.members.some(
+    (member) => ts.isMethodDeclaration(member) && member.name?.getText(source) === 'publish',
+  );
+  if (hasPublishEndpoint) return;
+
+  const draftPublishEndpoints = `
+  @ApiBearerAuth("jwt")
+  @Post(':id/publish')
+  async publish(@Param('id') id: number) {
+    return this.service.publishRecord(id);
+  }
+
+  @ApiBearerAuth("jwt")
+  @Post(':id/unpublish')
+  async unpublish(@Param('id') id: number) {
+    return this.service.unpublishRecord(id);
+  }
+`;
+
+  const updateRecorder = tree.beginUpdate(controllerFilePath);
+  updateRecorder.insertLeft(classNode.end - 1, draftPublishEndpoints);
+  tree.commitUpdate(updateRecorder);
+}
+
+// Reverses addDraftPublishEndpoints when draft/publish is turned off on an existing model:
+// calling publishRecord()/unpublishRecord() would just throw once the model's workflow flag
+// is off, so the generated routes are dead code and get removed. Matches methods by name only
+// (`publish`/`unpublish`), so a hand-renamed or hand-written method with either name would also
+// be removed here — an accepted tradeoff since the code-builder can't otherwise distinguish its
+// own generated methods from hand-written ones with the same name.
+export function removeDraftPublishEndpoints(tree: Tree, options: any): void {
+  const controller = getControllerClassNode(tree, options);
+  if (!controller) return;
+  const { source, controllerFilePath, classNode } = controller;
+
+  const endpointMethods = classNode.members.filter(
+    (member) => ts.isMethodDeclaration(member) && DRAFT_PUBLISH_ENDPOINT_METHOD_NAMES.includes(member.name?.getText(source) ?? ''),
+  );
+  if (endpointMethods.length === 0) return;
+
+  const updateRecorder = tree.beginUpdate(controllerFilePath);
+  endpointMethods.forEach((member) => {
+    updateRecorder.remove(member.pos, member.getFullText(source).length);
+  });
+  tree.commitUpdate(updateRecorder);
+}
+
+// Reconciles the controller's publish/unpublish routes with the model's current
+// draftPublishWorkflowEnabled state — the single entry point callers should use.
+export function syncDraftPublishEndpoints(tree: Tree, options: any): void {
+  if (normalizeBooleanOption(options.draftPublishWorkflowEnabled)) {
+    addDraftPublishEndpoints(tree, options);
+    return;
+  }
+  removeDraftPublishEndpoints(tree, options);
+}
+
+function withModelWorkflowOptions(options: any, field: any) {
+  return {
+    ...field,
+    modelInternationalisationEnabled: normalizeBooleanOption(options.internationalisation),
+    modelDraftPublishWorkflowEnabled: normalizeBooleanOption(options.draftPublishWorkflowEnabled),
+  };
+}
+
+export function normalizeBooleanOption(value: any): boolean {
+  return value === true || value === 'true';
 }
 
 function applyFieldChanges(tree: Tree, moduleName: string, fieldChanges: FieldChange[], generateChecksum: boolean = false) {
@@ -416,15 +533,15 @@ export function getSourceFilePathsAffected(command: Command, options: any): stri
   const sourceFilePaths: string[] = [];
   switch (command) {
     case Command.AddModule:
-      sourceFilePaths.push(`src/${dasherize(options.module)}/${dasherize(options.module)}.module.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/${kebabCase(options.module)}.module.ts`);
       break;
     case Command.AddModel:
-      sourceFilePaths.push(`src/${dasherize(options.module)}/${dasherize(options.module)}.module.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/services/${dasherize(options.model)}.service.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/controllers/${dasherize(options.model)}.controller.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/entities/${dasherize(options.model)}.entity.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/dtos/create-${dasherize(options.model)}.dto.ts`);
-      sourceFilePaths.push(`src/${dasherize(options.module)}/dtos/update-${dasherize(options.model)}.dto.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/${kebabCase(options.module)}.module.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/services/${kebabCase(options.model)}.service.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/controllers/${kebabCase(options.model)}.controller.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/entities/${kebabCase(options.model)}.entity.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/dtos/create-${kebabCase(options.model)}.dto.ts`);
+      sourceFilePaths.push(`src/${kebabCase(options.module)}/dtos/update-${kebabCase(options.model)}.dto.ts`);
       break;
     default:
       throw Error('Invalid command');
@@ -532,18 +649,20 @@ export function takeBackupIfChecksumsMismatch(tree: Tree, moduleName: string) {
 }
 
 export function calculateModuleFileImportPath(moduleName: string, internalPath: string) {
-  return (moduleName === SOLID_CORE_MODULE_NAME) ? internalPath : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
+  return (moduleName === SOLID_CORE_MODULE_NAME)
+    ? internalPath.replace(/^src\//, '../../')
+    : SOLID_CORE_MODULE_NPM_PACKAGE_NAME;
 }
 
 export function calculateParentModuleFileImportPath(moduleName: string, internalPath: string) {
   return (moduleName === SOLID_CORE_MODULE_NAME) ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME  : internalPath;
 }
 
-export function outputEntitySuperClassImport(module: string, isLegacyTable: boolean = false, isLegacyTableWithId: boolean = false, parentModel: string | null = null, parentModule: string = "solid-core") {
-  let importPath: string = isLegacyTableWithId ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : isLegacyTable ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : calculateModuleFileImportPath(module, `src/entities/common.entity`);
-  let importSymbol: string = isLegacyTableWithId ? "LegacyCommonWithIdEntity" : isLegacyTable ? "LegacyCommonEntity" : "CommonEntity";
+export function outputEntitySuperClassImport(module: string, legacyTableType: string = 'none', parentModel: string | null = null, parentModule: string = "solid-core") {
+  let importPath: string = (legacyTableType !== 'none') ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : calculateModuleFileImportPath(module, `src/entities/common.entity`);
+  let importSymbol: string = legacyTableType === 'generated_id' ? "LegacyCommonEntityWithGeneratedId" : legacyTableType === 'existing_id' ? "LegacyCommonEntityWithExistingId" : "CommonEntity";
   if (parentModel != null) {
-    importPath = calculateParentModuleFileImportPath(parentModule, `src/${dasherize(parentModule)}/entities/${dasherize(parentModel)}.entity`);
+    importPath = calculateParentModuleFileImportPath(parentModule, `../../${kebabCase(parentModule)}/entities/${kebabCase(parentModel)}.entity`);
     importSymbol = `${classify(parentModel)}`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
@@ -556,10 +675,10 @@ export function outputParentImportPathForDto(parentModel: string | null = null, 
   let importPath = ``;
   let importSymbol = ``;
   if (context === DtoSourceType.Update) {
-    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/dtos/update-${dasherize(parentModel)}.dto.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `../../${kebabCase(parentModule)}/dtos/update-${kebabCase(parentModel)}.dto.ts`;
     importSymbol = `Update${classify(parentModel)}Dto`;
   } else if (context === DtoSourceType.Create) {
-    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `src/${dasherize(parentModule)}/dtos/create-${dasherize(parentModel)}.dto.ts`;
+    importPath = parentModule === SOLID_CORE_MODULE_NAME ? SOLID_CORE_MODULE_NPM_PACKAGE_NAME : `../../${kebabCase(parentModule)}/dtos/create-${kebabCase(parentModel)}.dto.ts`;
     importSymbol = `Create${classify(parentModel)}Dto`;
   }
   return `import { ${importSymbol} } from '${importPath}';`;
@@ -570,7 +689,7 @@ export function unSnakeCase(name: string) {
 }
 
 export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string): any {
-  const metadataFilePath = getModuleMetadataFilePath(moduleName);
+  const metadataFilePath = resolveModuleMetadataFilePath(tree, moduleName);
   if (!tree.exists(metadataFilePath)) {
     throw new Error(`Module metadata file not found at ${metadataFilePath}`);
   }
@@ -594,9 +713,9 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
     dataSource: model.dataSource,
     dataSourceType: model.dataSourceType,
     modelEnableSoftDelete: model.enableSoftDelete,
-    draftPublishWorkflowEnabled: model.draftPublishWorkflow,
-    isLegacyTable: model.isLegacyTable ?? false,
-    isLegacyTableWithId: model.isLegacyTableWithId ?? false,
+    internationalisation: normalizeBooleanOption(model.internationalisation),
+    draftPublishWorkflowEnabled: normalizeBooleanOption(model.draftPublishWorkflow),
+    legacyTableType: model.legacyTableType ?? 'none',
     fields: model.fields.map((f: any) => JSON.stringify(f)),
     parentModel: null,
     parentModule: null,
@@ -610,8 +729,8 @@ export function readModelOptionsFromMetadata(tree: Tree, moduleName: string, mod
   return options;
 }
 
-export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string, fieldNames: string[]): { fields: string[], modelEnableSoftDelete: boolean, dataSourceType: string } {
-  const metadataFilePath = getModuleMetadataFilePath(moduleName);
+export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, modelName: string, fieldNames: string[]): { fields: string[], modelEnableSoftDelete: boolean, internationalisation: boolean, draftPublishWorkflowEnabled: boolean, dataSourceType: string } {
+  const metadataFilePath = resolveModuleMetadataFilePath(tree, moduleName);
   if (!tree.exists(metadataFilePath)) {
     throw new Error(`Module metadata file not found at ${metadataFilePath}`);
   }
@@ -645,6 +764,8 @@ export function readFieldOptionsFromMetadata(tree: Tree, moduleName: string, mod
   return {
     fields: matchedFields.map((f: any) => JSON.stringify(f)),
     modelEnableSoftDelete: model.enableSoftDelete ?? false,
+    internationalisation: normalizeBooleanOption(model.internationalisation),
+    draftPublishWorkflowEnabled: normalizeBooleanOption(model.draftPublishWorkflow),
     dataSourceType: model.dataSourceType,
   };
 }

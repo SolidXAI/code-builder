@@ -3,6 +3,7 @@ import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/
 import { FieldManager, FieldType, ManagerForDtoOptions, MAX_EMAIL_LENGTH } from '../../FieldManager';
 import { BaseFieldManagerForDto } from '../base/BaseFieldManagerForDto';
 import { EmailDecoratorManager } from '../../decorator-managers/dto/EmailDecoratorManager';
+import { EmptyStringToNullDecoratorManager } from '../../decorator-managers/dto/EmptyStringToNullDecoratorManager';
 import { isEmail } from 'class-validator';
 
 export class EmailFieldManagerForDto
@@ -18,6 +19,9 @@ export class EmailFieldManagerForDto
 
   constructor(tree: Tree, moduleName: string, modelName: string, field: any, options: ManagerForDtoOptions) {
     super(tree, moduleName, modelName, { ...field, max: field.max ?? MAX_EMAIL_LENGTH }, options);
+    this.decoratorManagers.push(
+      new EmptyStringToNullDecoratorManager({ isApplyTransform: !this.field.required, source: this.source, field: this.field })
+    );
     this.decoratorManagers.push(
       new EmailDecoratorManager({ isEmail: true, source : this.source, field: this.field})
     )

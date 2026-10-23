@@ -40,3 +40,6 @@ private.notes.txt
 # **/*.js
 **/*.js.map
 **/*.d.ts
+
+CLAUDE.MD
+*.tgz

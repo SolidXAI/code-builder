@@ -90,8 +90,23 @@ export class RegexDecoratorManager implements DecoratorManager {
       if (existingCallExpression.arguments.length > 1) {
         if (!ts.isObjectLiteralExpression(existingCallExpression.arguments[1])) { throw new Error('Regex decorator 2nd argument must be an object literal containing the validation options'); }
         const existingObjectLiteralExpression = existingCallExpression.arguments[1] as ts.ObjectLiteralExpression;
-        validationOptions.push(...existingObjectLiteralExpression.properties);
+        // Copy all existing options except 'message' (will be overwritten from metadata below)
+        validationOptions.push(...existingObjectLiteralExpression.properties.filter(p => {
+          const name = (p.name as ts.Identifier)?.text;
+          return name !== 'message';
+        }));
       }
+    }
+
+    // Upsert the message property from current metadata
+    const notMatchingErrorMsg = this.options.regexPatternNotMatchingErrorMsg;
+    if (notMatchingErrorMsg && notMatchingErrorMsg.trim().length > 0) {
+      validationOptions.push(
+        ts.factory.createPropertyAssignment(
+          ts.factory.createIdentifier('message'),
+          ts.factory.createStringLiteral(notMatchingErrorMsg)
+        )
+      );
     }
 
     // Re-create the column decorator with the merged column decorator options

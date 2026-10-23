@@ -1,4 +1,3 @@
-import { classify, dasherize } from '@angular-devkit/core/src/utils/strings';
 import {
   MergeStrategy,
   Rule,
@@ -17,16 +16,17 @@ import * as generateModelHelpers from './lib/model/helpers';
 import { addField, SOLID_CORE_MODULE_NAME, readModelOptionsFromMetadata, readFieldOptionsFromMetadata } from './lib/model/helpers';
 import { removeField } from './lib/model/helpers';
 import ts from '@schematics/angular/third_party/github.com/Microsoft/TypeScript/lib/typescript';
-import { strings } from '@angular-devkit/core';
+import { kebabCase } from 'lodash';
 
-const generateModelUtils = { dasherize, classify, ...generateModelHelpers };
+import { classify } from './lib/string.utils';
+const generateModelUtils = { dasherize: kebabCase, classify, ...generateModelHelpers };
 // You don't have to export the function as default. You can also have more than one rule factory
 // per file.
 export function addModule(options: any): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
     const moduleName = options.module;
     const moduleFolderPath = `src/${moduleName}`;
-    const moduleFilePath = `${moduleFolderPath}/${strings.dasherize(moduleName)}.module.ts`;
+    const moduleFilePath = `${moduleFolderPath}/${kebabCase(moduleName)}.module.ts`;
 
     if (_tree.exists(moduleFilePath)) {
       throw new Error(`Module file already exists at ${moduleFilePath}. Please use a unique module name.`);
@@ -56,7 +56,7 @@ export function refreshModel(options: any): Rule {
     const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
 
     // If the model related code is not present, then add it by call addModel, else call update field with the fields provided
-    const modelEntityFilePath = `${modulePath}/entities/${dasherize(options.model)}.entity.ts`;
+    const modelEntityFilePath = `${modulePath}/entities/${kebabCase(options.model)}.entity.ts`;
     const rules : Rule[] = [];
     if (!tree.exists(modelEntityFilePath)) {
       rules.push(addModel(options));
@@ -112,6 +112,11 @@ function updateFields(options: any): Rule {
     fields.forEach((field: any) => {
       generateModelHelpers.updateField(tree, options, field);
     });
+    // addModel only renders the controller once, on first creation, so an existing model
+    // toggling draft/publish afterwards never gets its publish/unpublish routes added or
+    // removed. Reconciled here since this rule already runs on every refresh regardless
+    // of model age.
+    generateModelHelpers.syncDraftPublishEndpoints(tree, options);
     return tree;
   };
 }
@@ -120,10 +125,7 @@ export function removeFields(options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
     // Resolve field names to full field definitions from metadata
     const fieldNames = Array.isArray(options.fieldNamesForRemoval) ? options.fieldNamesForRemoval : [options.fieldNamesForRemoval];
-    const metadataResult = readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames);
-    options.fields = metadataResult.fields;
-    options.modelEnableSoftDelete = metadataResult.modelEnableSoftDelete;
-    options.dataSourceType = metadataResult.dataSourceType;
+    Object.assign(options, readFieldOptionsFromMetadata(tree, options.module, options.model, fieldNames));
 
     const normalizedFields = normalizeFieldType(options.fields);
     const fields: any[] = normalizedFields.map((f: any) => JSON.parse(f));
@@ -134,12 +136,11 @@ export function removeFields(options: any): Rule {
   };
 }
 
-
 function addModuleImportsAndMetadata(options: any) { // TODO This method should perhaps be moved elsewhere since this is not a seperate command
   return (tree: Tree, _context: SchematicContext) => {
     // Handle the module imports
     const modulePath = (options.module === SOLID_CORE_MODULE_NAME) ? `src` : `src/${options.module}`;
-    const moduleFilePath = `${modulePath}/${dasherize(options.module)}.module.ts`;
+    const moduleFilePath = `${modulePath}/${kebabCase(options.module)}.module.ts`;
     const moduleImports: generateModelHelpers.ImportData[] = [
       { symbolName: `TypeOrmModule`, importPath: `@nestjs/typeorm` },
       generateModelHelpers.getSolidImports(
@@ -213,6 +214,3 @@ function showTree(sourceNode: ts.SourceFile){
   }
   printAllChildren(sourceNode, 0);
 }
-
-
-
