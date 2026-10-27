@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.13] - 2026-10-27
+
+### Maintenance
+
+- exclude CLAUDE.md and .claude/ from npm package (#33)
+
 ## [0.1.13-beta.0] - 2026-10-13
 
 ### Maintenance
